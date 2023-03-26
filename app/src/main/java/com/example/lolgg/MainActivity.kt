@@ -23,9 +23,12 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val edit = findViewById<EditText>(R.id.summonerEdit)
+        println("gdgdgdgdgdg")
         edit.setOnKeyListener { view, i, keyEvent ->
+            println("keyEvent : $i")
             if (keyEvent.action != KeyEvent.ACTION_UP && i == KeyEvent.KEYCODE_ENTER)
             {
+                println("엔터")
                 var summonerInfo : SummonerDTO?
 
                 runBlocking {
@@ -37,7 +40,6 @@ class MainActivity : AppCompatActivity() {
                 if(summonerInfo != null)
                 {
                     Log.d("Log","success")
-
                     val intent = Intent(this,RecordOfSummonerActivity::class.java)
                     intent.putExtra("key",summonerInfo)
                     startActivity(intent)
@@ -57,7 +59,7 @@ class MainActivity : AppCompatActivity() {
         var summonerInfo : SummonerDTO? = null
 
         withContext(Dispatchers.IO) {
-            val apiKey = "RGAPI-40948133-70ea-4a2d-b8e5-716446986a7e"
+            val apiKey = "RGAPI-6f74d5dd-c566-4708-89c3-ed55590841f4"
             val summoner = URLEncoder.encode(edit.text.toString(), UTF_8.toString())
             val requestURL = "https://kr.api.riotgames.com/lol/summoner/v4/summoners/by-name/$summoner?api_key=$apiKey"
             val url = URL(requestURL)
