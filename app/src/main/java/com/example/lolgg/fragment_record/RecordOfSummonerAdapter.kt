@@ -19,6 +19,7 @@ class RecordOfSummonerAdapter : RecyclerView.Adapter<RecordOfSummonerAdapter.Rec
         val view =  LayoutInflater.from(parent.context).inflate(R.layout.record_item,parent,false)
 
         //return ViewHolder(view)
+        TODO("Not yet implemented")
     }
 
     override fun onBindViewHolder(holder: RecordOfSummonerViewHolder, position: Int) {
