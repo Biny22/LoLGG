@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -22,7 +23,7 @@ class RecordOfSummonerActivity : AppCompatActivity() {
         intent.getSerializableExtra("key") as SummonerDTO
     }
 
-    val apiKey = "RGAPI-6f74d5dd-c566-4708-89c3-ed55590841f4"
+    val apiKey = "RGAPI-59ff4281-f144-4b29-ab58-5821b173ccf6"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,11 +33,14 @@ class RecordOfSummonerActivity : AppCompatActivity() {
         val profileIconView = findViewById<ImageView>(R.id.profileIcon)
         val mostChampionView = findViewById<ImageView>(R.id.mostChampionImgView)
 
-
-
         var profileIconBitmap : Bitmap
         var mostChampionViewBitmap : Bitmap
         val championsDTO = getChampionsDTO()
+
+        val recyclerView = findViewById<RecyclerView>(R.id.recordOfSummoner)
+        val recyclerViewAdapter = RecordOfSummonerAdapter(summonerInfo, apiKey)
+        recyclerView.adapter = recyclerViewAdapter
+
         runBlocking {
             profileIconBitmap = getProFileIcon()!!
             mostChampionViewBitmap = getMostChampionView()!!
@@ -71,7 +75,6 @@ class RecordOfSummonerActivity : AppCompatActivity() {
         var bitmap : Bitmap? = null
         withContext(Dispatchers.IO) {
             val key = requestMostChampionKey()
-            println(key)
             val data = getChampionsDTO().data
             var championId = ""
             for(champion in data)
@@ -193,28 +196,28 @@ class RecordOfSummonerActivity : AppCompatActivity() {
         return tags
     }
 
-    private fun getStatsDTO(champion: JSONObject) : StatsDTO
+    private fun getStatsDTO(champion: JSONObject) : ChampionStatsDTO
     {
         val stats = JSONObject(champion["stats"].toString())
-        return StatsDTO(stats["hp"].toString(), stats["hpperlevel"].toString(), stats["mp"].toString(), stats["mpperlevel"].toString(),
+        return ChampionStatsDTO(stats["hp"].toString(), stats["hpperlevel"].toString(), stats["mp"].toString(), stats["mpperlevel"].toString(),
             stats["movespeed"].toString(), stats["armor"].toString(), stats["armorperlevel"].toString(), stats["spellblock"].toString(),
             stats["spellblockperlevel"].toString(), stats["attackrange"].toString(), stats["hpregen"].toString(), stats["hpregenperlevel"].toString(),
             stats["mpregen"].toString(), stats["mpregenperlevel"].toString(), stats["crit"].toString(), stats["critperlevel"].toString(),
             stats["attackdamage"].toString(), stats["attackdamageperlevel"].toString(), stats["attackspeedperlevel"].toString(), stats["attackspeed"].toString())
     }
 
-    private fun getInfoDTO(champion: JSONObject) : InfoDTO
+    private fun getInfoDTO(champion: JSONObject) : ChampionInfoDTO
     {
         val info = JSONObject(champion["info"].toString())
 
-        return InfoDTO(info["attack"] as Int, info["defense"] as Int, info["magic"] as Int, info["difficulty"] as Int)
+        return ChampionInfoDTO(info["attack"] as Int, info["defense"] as Int, info["magic"] as Int, info["difficulty"] as Int)
     }
 
-    private fun getImageDTO(champion: JSONObject) : ImageDTO
+    private fun getImageDTO(champion: JSONObject) : ChampionImageDTO
     {
         val image = JSONObject(champion["image"].toString())
 
-        return ImageDTO(image["full"].toString(), image["sprite"].toString(), image["group"].toString(),
+        return ChampionImageDTO(image["full"].toString(), image["sprite"].toString(), image["group"].toString(),
             image["x"] as Int, image["y"] as Int, image["w"] as Int, image["h"] as Int)
     }
 
@@ -232,12 +235,12 @@ class RecordOfSummonerActivity : AppCompatActivity() {
 
 data class ChampionsDTO(val type : String, val format : String, val version: String, val data : List<ChampionDTO>)
 
-data class ChampionDTO(val version : String, val id : String, val key : String, val name : String, val title : String, val blurb : String, val info : InfoDTO, val image : ImageDTO,
-                       val tags : List<String>, val partype : String, val stats : StatsDTO)
+data class ChampionDTO(val version : String, val id : String, val key : String, val name : String, val title : String, val blurb : String, val info : ChampionInfoDTO, val image : ChampionImageDTO,
+                       val tags : List<String>, val partype : String, val stats : ChampionStatsDTO)
 
-data class InfoDTO(val attack : Int, val defense : Int, val magic : Int, val difficulty : Int)
+data class ChampionInfoDTO(val attack : Int, val defense : Int, val magic : Int, val difficulty : Int)
 
-data class ImageDTO(val full : String, val sprite : String, val group : String, val x : Int, val y : Int, val w : Int, val h : Int)
+data class ChampionImageDTO(val full : String, val sprite : String, val group : String, val x : Int, val y : Int, val w : Int, val h : Int)
 
 /*
 data class StatsDTO(val hp : Int, val hpperlevel: Int, val mp : Int, val mpperlevel : Int, val movespeed : Int, val armor : Int, val armorperlevel : Double,
@@ -246,7 +249,7 @@ data class StatsDTO(val hp : Int, val hpperlevel: Int, val mp : Int, val mpperle
                     val attackspeedperlevel : Double, val attackspeed : Double)
 
  */
-data class StatsDTO(val hp : String, val hpperlevel: String, val mp : String, val mpperlevel : String, val movespeed : String, val armor : String, val armorperlevel : String,
-                    val spellblock : String, val spellblockperlevel : String, val attackrange : String, val hpregen : String, val hpregenperlevel : String,
-                    val mpregen : String, val mpregenperlevel : String, val crit : String, val critperlevel : String, val attackdamage : String, val attackdamageperlevel : String,
-                    val attackspeedperlevel : String, val attackspeed : String)
+data class ChampionStatsDTO(val hp : String, val hpperlevel: String, val mp : String, val mpperlevel : String, val movespeed : String, val armor : String, val armorperlevel : String,
+                            val spellblock : String, val spellblockperlevel : String, val attackrange : String, val hpregen : String, val hpregenperlevel : String,
+                            val mpregen : String, val mpregenperlevel : String, val crit : String, val critperlevel : String, val attackdamage : String, val attackdamageperlevel : String,
+                            val attackspeedperlevel : String, val attackspeed : String)

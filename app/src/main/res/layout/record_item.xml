@@ -14,7 +14,7 @@
         tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
-        android:id="@+id/spell2ImgView"
+        android:id="@+id/spellImgView2"
         android:layout_width="25dp"
         android:layout_height="25dp"
         tools:layout_editor_absoluteX="132dp"
@@ -22,7 +22,7 @@
         tools:srcCompat="@tools:sample/avatars" />
 
     <TextView
-        android:id="@+id/gameModeTextView"
+        android:id="@+id/gameMode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="무작위 총력전"
@@ -30,7 +30,7 @@
         tools:layout_editor_absoluteY="7dp" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/killRate"
         android:layout_width="81dp"
         android:layout_height="24dp"
         android:text="킬 관여율"
@@ -38,7 +38,7 @@
         tools:layout_editor_absoluteY="46dp" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/kda"
         android:layout_width="112dp"
         android:layout_height="31dp"
         android:text="100/100/100"
@@ -47,7 +47,7 @@
         tools:layout_editor_absoluteY="10dp" />
 
     <TextView
-        android:id="@+id/textView6"
+        android:id="@+id/date"
         android:layout_width="79dp"
         android:layout_height="18dp"
         android:text="12월 11일"
@@ -71,7 +71,7 @@
         tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
-        android:id="@+id/spell1ImgView"
+        android:id="@+id/spellImgView1"
         android:layout_width="25dp"
         android:layout_height="25dp"
         tools:layout_editor_absoluteX="132dp"
@@ -79,7 +79,7 @@
         tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
-        android:id="@+id/item1ImgView"
+        android:id="@+id/itemImgView1"
         android:layout_width="25dp"
         android:layout_height="25dp"
         tools:layout_editor_absoluteX="62dp"
@@ -87,7 +87,7 @@
         tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
-        android:id="@+id/item2ImgView"
+        android:id="@+id/itemImgView2"
         android:layout_width="25dp"
         android:layout_height="25dp"
         tools:layout_editor_absoluteX="97dp"
@@ -95,7 +95,7 @@
         tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
-        android:id="@+id/item3ImgView"
+        android:id="@+id/itemImgView3"
         android:layout_width="25dp"
         android:layout_height="25dp"
         tools:layout_editor_absoluteX="132dp"
@@ -103,7 +103,7 @@
         tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
-        android:id="@+id/item7ImgView"
+        android:id="@+id/itemImgView7"
         android:layout_width="25dp"
         android:layout_height="25dp"
         tools:layout_editor_absoluteX="272dp"
@@ -111,7 +111,7 @@
         tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
-        android:id="@+id/item4ImgView"
+        android:id="@+id/itemImgView4"
         android:layout_width="25dp"
         android:layout_height="25dp"
         tools:layout_editor_absoluteX="167dp"
@@ -119,7 +119,7 @@
         tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
-        android:id="@+id/item5ImgView"
+        android:id="@+id/itemImgView5"
         android:layout_width="25dp"
         android:layout_height="25dp"
         tools:layout_editor_absoluteX="202dp"
@@ -127,7 +127,7 @@
         tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
-        android:id="@+id/item6ImgView"
+        android:id="@+id/itemImgView6"
         android:layout_width="25dp"
         android:layout_height="25dp"
         tools:layout_editor_absoluteX="237dp"
@@ -143,13 +143,13 @@
         tools:layout_editor_absoluteY="5dp">
 
         <TextView
-            android:id="@+id/textView4"
+            android:id="@+id/result"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="승리" />
 
         <TextView
-            android:id="@+id/textView5"
+            android:id="@+id/period"
             android:layout_width="57dp"
             android:layout_height="24dp"
             android:text="27분 12초" />
