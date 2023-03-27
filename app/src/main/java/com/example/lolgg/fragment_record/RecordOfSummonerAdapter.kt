@@ -10,15 +10,15 @@ import com.example.lolgg.R
 class RecordOfSummonerAdapter : RecyclerView.Adapter<RecordOfSummonerAdapter.RecordOfSummonerViewHolder>() {
     inner class RecordOfSummonerViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         // 누르면 실행되는 부분
-        val itemList : MutableList<String> // 아이템 리스트
-        val runeList : MutableList<String> // 룬을 담고 있는 리스트
-        val champion : ImageView // 챔피온 이미지를 담고 있는
+        //val itemList : MutableList<String> // 아이템 리스트
+        //val runeList : MutableList<String> // 룬을 담고 있는 리스트
+        //val champion : ImageView // 챔피온 이미지를 담고 있는
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecordOfSummonerViewHolder {
         val view =  LayoutInflater.from(parent.context).inflate(R.layout.record_item,parent,false)
 
-        return ViewHolder(view)
+        //return ViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: RecordOfSummonerViewHolder, position: Int) {
