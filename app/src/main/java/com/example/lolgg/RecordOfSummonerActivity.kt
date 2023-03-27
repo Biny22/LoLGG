@@ -22,7 +22,7 @@ class RecordOfSummonerActivity : AppCompatActivity() {
         intent.getSerializableExtra("key") as SummonerDTO
     }
 
-    val apiKey = "RGAPI-6f74d5dd-c566-4708-89c3-ed55590841f4"
+    val apiKey = "RGAPI-59ff4281-f144-4b29-ab58-5821b173ccf6"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,6 +105,7 @@ class RecordOfSummonerActivity : AppCompatActivity() {
             val inputStream = httpURLConnection.inputStream
             val scan = Scanner(inputStream)
             val JSONObject = JSONObject(JSONArray(scan.nextLine())[0].toString())
+            println(JSONObject)
             key = JSONObject["championId"].toString()
         }
 

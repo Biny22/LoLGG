@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
         var summonerInfo : SummonerDTO? = null
 
         withContext(Dispatchers.IO) {
-            val apiKey = "RGAPI-6f74d5dd-c566-4708-89c3-ed55590841f4"
+            val apiKey = "RGAPI-59ff4281-f144-4b29-ab58-5821b173ccf6"
             val summoner = URLEncoder.encode(edit.text.toString(), UTF_8.toString())
             val requestURL = "https://kr.api.riotgames.com/lol/summoner/v4/summoners/by-name/$summoner?api_key=$apiKey"
             val url = URL(requestURL)
