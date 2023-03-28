@@ -2,64 +2,77 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/recordItem"
     android:layout_width="match_parent"
-    android:layout_height="115dp"
-    android:id="@+id/recordItem">
+    android:layout_height="115dp">
 
     <ImageView
         android:id="@+id/championImgView"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        tools:layout_editor_absoluteX="62dp"
-        tools:layout_editor_absoluteY="10dp"
+        android:layout_marginStart="7dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toEndOf="@+id/linearLayout"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_marginTop="10dp"
         tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
         android:id="@+id/spellImgView2"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        tools:layout_editor_absoluteX="132dp"
-        tools:layout_editor_absoluteY="45dp"
+        android:layout_marginStart="72dp"
+        android:layout_marginTop="5dp"
+        app:layout_constraintStart_toStartOf="@+id/championImgView"
+        app:layout_constraintTop_toBottomOf="@+id/spellImgView1"
         tools:srcCompat="@tools:sample/avatars" />
 
     <TextView
         android:id="@+id/gameMode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
         android:text="무작위 총력전"
-        tools:layout_editor_absoluteX="324dp"
-        tools:layout_editor_absoluteY="7dp" />
+        app:layout_constraintStart_toEndOf="@+id/kda"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/killRate"
         android:layout_width="81dp"
         android:layout_height="24dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
         android:text="킬 관여율"
-        tools:layout_editor_absoluteX="202dp"
-        tools:layout_editor_absoluteY="46dp" />
+        app:layout_constraintStart_toEndOf="@+id/perksSubStyleImgView"
+        app:layout_constraintTop_toBottomOf="@+id/kda" />
 
     <TextView
         android:id="@+id/kda"
         android:layout_width="112dp"
         android:layout_height="31dp"
+        android:layout_marginStart="8dp"
         android:text="100/100/100"
         android:textSize="18sp"
-        tools:layout_editor_absoluteX="202dp"
+        app:layout_constraintStart_toEndOf="@+id/perksPrimaryStyleImgView"
         tools:layout_editor_absoluteY="10dp" />
 
     <TextView
         android:id="@+id/date"
         android:layout_width="79dp"
         android:layout_height="18dp"
-        android:text="12월 11일"
-        tools:layout_editor_absoluteX="325dp"
-        tools:layout_editor_absoluteY="28dp" />
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        android:text="3월 1일"
+        app:layout_constraintStart_toEndOf="@+id/kda"
+        app:layout_constraintTop_toBottomOf="@+id/gameMode" />
 
     <ImageView
         android:id="@+id/perksSubStyleImgView"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        tools:layout_editor_absoluteX="167dp"
+        android:layout_marginStart="8dp"
+        app:layout_constraintStart_toEndOf="@+id/spellImgView2"
         tools:layout_editor_absoluteY="45dp"
         tools:srcCompat="@tools:sample/avatars" />
 
@@ -67,7 +80,8 @@
         android:id="@+id/perksPrimaryStyleImgView"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        tools:layout_editor_absoluteX="167dp"
+        android:layout_marginStart="8dp"
+        app:layout_constraintStart_toEndOf="@+id/spellImgView1"
         tools:layout_editor_absoluteY="9dp"
         tools:srcCompat="@tools:sample/avatars" />
 
@@ -75,73 +89,97 @@
         android:id="@+id/spellImgView1"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        tools:layout_editor_absoluteX="132dp"
-        tools:layout_editor_absoluteY="9dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintStart_toEndOf="@+id/championImgView"
+        app:layout_constraintTop_toTopOf="parent"
         tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
         android:id="@+id/itemImgView1"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        tools:layout_editor_absoluteX="62dp"
-        tools:layout_editor_absoluteY="80dp"
+        android:layout_marginStart="7dp"
+        android:layout_marginTop="80dp"
+        app:layout_constraintStart_toEndOf="@+id/linearLayout"
+        app:layout_constraintTop_toTopOf="parent"
         tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
         android:id="@+id/itemImgView2"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        tools:layout_editor_absoluteX="97dp"
-        tools:layout_editor_absoluteY="80dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="80dp"
+        app:layout_constraintStart_toEndOf="@+id/itemImgView1"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_marginStart="10dp"
         tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
         android:id="@+id/itemImgView3"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        tools:layout_editor_absoluteX="132dp"
-        tools:layout_editor_absoluteY="80dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="80dp"
+        app:layout_constraintStart_toEndOf="@+id/itemImgView2"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_marginStart="10dp"
         tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
         android:id="@+id/itemImgView7"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        tools:layout_editor_absoluteX="272dp"
-        tools:layout_editor_absoluteY="80dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="80dp"
+        app:layout_constraintStart_toEndOf="@+id/itemImgView6"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_marginStart="10dp"
         tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
         android:id="@+id/itemImgView4"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        tools:layout_editor_absoluteX="167dp"
-        tools:layout_editor_absoluteY="80dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="80dp"
+        app:layout_constraintStart_toEndOf="@+id/itemImgView3"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_marginStart="10dp"
         tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
         android:id="@+id/itemImgView5"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        tools:layout_editor_absoluteX="202dp"
-        tools:layout_editor_absoluteY="80dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="80dp"
+        app:layout_constraintStart_toEndOf="@+id/itemImgView4"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_marginStart="10dp"
         tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
         android:id="@+id/itemImgView6"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        tools:layout_editor_absoluteX="237dp"
-        tools:layout_editor_absoluteY="80dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="80dp"
+        app:layout_constraintStart_toEndOf="@+id/itemImgView5"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_marginStart="10dp"
         tools:srcCompat="@tools:sample/avatars" />
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="55dp"
         android:layout_height="105dp"
         android:background="#4CAFDC"
         android:orientation="vertical"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="5dp">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/result"
@@ -153,7 +191,7 @@
             android:id="@+id/period"
             android:layout_width="57dp"
             android:layout_height="24dp"
-            android:text="27분 12초" />
+            android:text="17분 15초" />
 
     </LinearLayout>
 
