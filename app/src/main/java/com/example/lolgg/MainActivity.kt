@@ -23,19 +23,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val edit = findViewById<EditText>(R.id.summonerEdit)
-        println("gdgdgdgdgdg")
+
         edit.setOnKeyListener { view, i, keyEvent ->
             println("keyEvent : $i")
             if (keyEvent.action != KeyEvent.ACTION_UP && i == KeyEvent.KEYCODE_ENTER)
             {
-                println("엔터")
                 var summonerInfo : SummonerDTO?
 
                 runBlocking {
                     summonerInfo = request(edit)
                 }
-
-                println(summonerInfo)
 
                 if(summonerInfo != null)
                 {
