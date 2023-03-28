@@ -1,226 +1,47 @@
 package com.example.lolgg
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.Dispatchers
+import com.example.lolgg.network.Network
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
-import org.json.JSONArray
-import org.json.JSONObject
-import java.lang.Exception
-import java.net.HttpURLConnection
-import java.net.URL
-import java.util.*
 
 class RecordOfSummonerActivity : AppCompatActivity() {
 
-    val summonerInfo by lazy {
+    private val summonerDTO by lazy {
         intent.getSerializableExtra("key") as SummonerDTO
     }
-
-    val apiKey = "RGAPI-59ff4281-f144-4b29-ab58-5821b173ccf6"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_summoner_of_record)
         val summonerId = findViewById<TextView>(R.id.summonerId)
-        summonerId.text = summonerInfo.name
+        summonerId.text = summonerDTO.name
         val profileIconView = findViewById<ImageView>(R.id.profileIcon)
         val mostChampionView = findViewById<ImageView>(R.id.mostChampionImgView)
 
+        val network = Network(summonerDTO)
         var profileIconBitmap : Bitmap
         var mostChampionViewBitmap : Bitmap
-        val championsDTO = getChampionsDTO()
+        val championsDTO = network.getChampionsDTO()
 
         val recyclerView = findViewById<RecyclerView>(R.id.recordOfSummoner)
-        val recyclerViewAdapter = RecordOfSummonerAdapter(summonerInfo, apiKey)
+        val recyclerViewAdapter = RecordOfSummonerAdapter(summonerDTO)
         recyclerView.adapter = recyclerViewAdapter
 
         runBlocking {
-            profileIconBitmap = getProFileIcon()!!
-            mostChampionViewBitmap = getMostChampionView()!!
+            profileIconBitmap = network.getProFileIcon()!!
+            mostChampionViewBitmap = network.getMostChampionView()!!
         }
         profileIconView.setImageBitmap(profileIconBitmap)
         mostChampionView.setImageBitmap(mostChampionViewBitmap)
        // println(s)
     }
 
-    private suspend fun getProFileIcon() : Bitmap?
-    {
-        var bitmap : Bitmap? = null
-        withContext(Dispatchers.IO) {
-            val requestURL = "http://ddragon.leagueoflegends.com/cdn/13.6.1/img/profileicon/${summonerInfo.profileIconId}.png"
-            val url = URL(requestURL)
-            val httpURLConnection = url.openConnection() as HttpURLConnection
-
-            try{
-                val inputStream = httpURLConnection.inputStream
-                bitmap = BitmapFactory.decodeStream(inputStream)
-            } catch (e : Exception) {
-                println("죽음")
-            }
-
-        }
-        return bitmap
-    }
-
-    private suspend fun getMostChampionView() : Bitmap?
-    {
-        // 여기서 소환사의 mostChampion을 가져와 jpg를 요청해야함.
-        var bitmap : Bitmap? = null
-        withContext(Dispatchers.IO) {
-            val key = requestMostChampionKey()
-            val data = getChampionsDTO().data
-            var championId = ""
-            for(champion in data)
-            {
-                if(champion.key != key)
-                    continue
-
-                championId = champion.id
-            }
-            val requestURL = "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${championId}_0.jpg"
-            val url = URL(requestURL)
-            val httpURLConnection = url.openConnection() as HttpURLConnection
-
-            try{
-                val inputStream = httpURLConnection.inputStream
-                bitmap = BitmapFactory.decodeStream(inputStream)
-            } catch (e : Exception) {
-                println("죽음")
-            }
-        }
-        return bitmap
-    }
-
-    private suspend fun requestMostChampionKey() : String
-    {
-        var key : String
-        withContext(Dispatchers.IO) {
-            val requestURL = "https://kr.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/${summonerInfo.id}/top?count=1&api_key=$apiKey"
-            val url = URL(requestURL)
-            val httpURLConnection = url.openConnection() as HttpURLConnection
-            val inputStream = httpURLConnection.inputStream
-            val scan = Scanner(inputStream)
-            val JSONObject = JSONObject(JSONArray(scan.nextLine())[0].toString())
-            println(JSONObject)
-            key = JSONObject["championId"].toString()
-        }
-
-        return key
-    }
-
-
-
-
-
-    // champion data 를 가져오는 메소드
-
-    private suspend fun requestChampionData() : JSONObject
-    {
-        var championsData : JSONObject
-
-        withContext(Dispatchers.IO) {
-            val requestURL = "https://ddragon.leagueoflegends.com/cdn/13.6.1/data/ko_KR/champion.json"
-            val url = URL(requestURL)
-            val httpURLConnection = url.openConnection() as HttpURLConnection
-            val inputStream = httpURLConnection.inputStream
-            val scan = Scanner(inputStream)
-            championsData = JSONObject(scan.nextLine())
-        }
-
-        return championsData
-    }
-
-    private fun getChampionsDTO() : ChampionsDTO
-    {
-        val championsData : JSONObject
-
-        runBlocking {
-             championsData = requestChampionData()
-        }
-
-        val type = championsData["type"].toString()
-        val format = championsData["version"].toString()
-        val version = championsData["version"].toString()
-        val data = JSONObject(championsData["data"].toString())
-        val championsDTOList = getChampionsDTOList(data)
-
-        return ChampionsDTO(type, format, version, championsDTOList)
-    }
-
-    private fun getChampionsDTOList(data : JSONObject) : MutableList<ChampionDTO>
-    {
-        val championList = mutableListOf<ChampionDTO>()
-        for(dataKey in data.keys())
-        {
-            val champion = JSONObject(data[dataKey].toString())
-            val championDTO = getChampionDTO(champion)
-            championList.add(championDTO)
-        }
-
-        return championList
-    }
-
-    private fun getChampionDTO(champion : JSONObject) : ChampionDTO
-    {
-        val version = champion["version"].toString()
-        val id = champion["id"].toString()
-        val key = champion["key"].toString()
-        val name = champion["name"].toString()
-        val title = champion["title"].toString()
-        val blurb = champion["blurb"].toString()
-        val infoDTO = getInfoDTO(champion)
-        val imageDTO = getImageDTO(champion)
-        val tags = getTags(champion)
-        val partype = champion["partype"].toString()
-        val statsDTO = getStatsDTO(champion)
-
-        return ChampionDTO(version, id, key, name, title, blurb, infoDTO, imageDTO, tags, partype, statsDTO)
-    }
-
-    private fun getTags(champion : JSONObject) : MutableList<String>
-    {
-        val tags = mutableListOf<String>()
-        val tokenizer = StringTokenizer(champion["tags"].toString())
-
-        while(tokenizer.hasMoreTokens())
-        {
-            tags.add(tokenizer.nextToken("[\",]"))
-        }
-
-        return tags
-    }
-
-    private fun getStatsDTO(champion: JSONObject) : ChampionStatsDTO
-    {
-        val stats = JSONObject(champion["stats"].toString())
-        return ChampionStatsDTO(stats["hp"].toString(), stats["hpperlevel"].toString(), stats["mp"].toString(), stats["mpperlevel"].toString(),
-            stats["movespeed"].toString(), stats["armor"].toString(), stats["armorperlevel"].toString(), stats["spellblock"].toString(),
-            stats["spellblockperlevel"].toString(), stats["attackrange"].toString(), stats["hpregen"].toString(), stats["hpregenperlevel"].toString(),
-            stats["mpregen"].toString(), stats["mpregenperlevel"].toString(), stats["crit"].toString(), stats["critperlevel"].toString(),
-            stats["attackdamage"].toString(), stats["attackdamageperlevel"].toString(), stats["attackspeedperlevel"].toString(), stats["attackspeed"].toString())
-    }
-
-    private fun getInfoDTO(champion: JSONObject) : ChampionInfoDTO
-    {
-        val info = JSONObject(champion["info"].toString())
-
-        return ChampionInfoDTO(info["attack"] as Int, info["defense"] as Int, info["magic"] as Int, info["difficulty"] as Int)
-    }
-
-    private fun getImageDTO(champion: JSONObject) : ChampionImageDTO
-    {
-        val image = JSONObject(champion["image"].toString())
-
-        return ChampionImageDTO(image["full"].toString(), image["sprite"].toString(), image["group"].toString(),
-            image["x"] as Int, image["y"] as Int, image["w"] as Int, image["h"] as Int)
-    }
+    // champion data 를 가져오는 메소
 
     /*
     override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {

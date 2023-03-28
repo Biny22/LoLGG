@@ -24,7 +24,7 @@ class RecordOfSummonerAdapter : RecyclerView.Adapter<RecordOfSummonerAdapter.Rec
 
     override fun onBindViewHolder(holder: RecordOfSummonerViewHolder, position: Int) {
         TODO("Not yet implemented")
-        //
+
     }
 
     override fun getItemCount(): Int {
