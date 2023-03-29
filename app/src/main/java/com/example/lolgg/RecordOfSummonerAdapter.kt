@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.beust.klaxon.JsonArray
 import com.example.lolgg.network.Network
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -77,7 +78,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
     }
 
     private val network : Network = Network(summonerDTO)
-    val apiKey = "RGAPI-0cc3c992-cff7-4f50-8095-5cc91ed2aa29"
+    val apiKey = "RGAPI-251b41b3-7e65-4d62-97b1-ec2b1cb82702"
 
     private val matches : MutableList<String> by lazy {
         runBlocking {
@@ -118,7 +119,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
         if(position == 1)
         {
             getSummaryMatchInfo(1)
-            getSpells()
+            getRunesReforgedDTO()
         }
 
         // 아이템 아이콘 set
@@ -168,6 +169,114 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
     override fun getItemCount(): Int {
         return matches.size
     }
+
+
+    suspend fun requestRunesReforgedDTO() : JSONArray
+    {
+        val runesReforgedData : JSONArray
+
+        withContext(Dispatchers.IO) {
+            val requestURL = "https://ddragon.leagueoflegends.com/cdn/10.16.1/data/ko_KR/runesReforged.json"
+            val url = URL(requestURL)
+            val httpURLConnection = url.openConnection() as HttpURLConnection
+            val inputStream = httpURLConnection.inputStream
+            val scan = Scanner(inputStream)
+            runesReforgedData = JSONArray(scan.nextLine())
+        }
+
+        return runesReforgedData
+    }
+
+    fun getRunesReforgedDTO() : RunesForgedDTO
+    {
+        // [ 지배, 영감, 결의, 마법... ] -> runesReforgedJson
+        val runesReforgedJson = runBlocking { requestRunesReforgedDTO() }
+
+        return getRuneDataDTO(runesReforgedJson)
+    }
+
+    fun getRuneDataDTO(runesReforgedJson : JSONArray) : RunesForgedDTO
+    {
+        val dataId = mutableListOf<String>()
+        val data = mutableListOf<RuneDataDTO>()
+
+        for(i in 0 until runesReforgedJson.length())
+        {
+            // { 지배 }
+            val json = JSONObject(runesReforgedJson[i].toString())
+
+            val id = json["id"].toString()
+            val key = json["key"].toString()
+            val icon = json["icon"].toString()
+            val name = json["name"].toString()
+
+            val slotsArray = JSONArray(json["slots"].toString())
+            //val runeDataDTO =
+
+            dataId.add(id)
+        }
+
+        return RunesForgedDTO(dataId, data)
+    }
+
+
+    // 파라미터 : 지배 룬
+    fun getSlots(slotsArray : JSONArray) : List<SlotDTO>
+    {
+        // 여기에 각 슬롯이 옴
+        // [ 룬 슬롯 1, 룬슬롯2, 룬슬롯 3 ]
+        val slots = mutableListOf<SlotDTO>()
+
+        for(j in 0 until slotsArray.length())
+        {
+            val runePaths = JSONObject(slotsArray[j].toString())
+            val array = JSONArray(runePaths["runes"].toString())
+            slots.add(getSlotDTO(array))
+        }
+
+        return slots
+    }
+
+
+
+    fun getSlotDTO(slots : JSONArray) : SlotDTO
+    {
+        // [감전, 포식자...]
+        val runes = mutableListOf<RuneDTO>()
+        for(k in 0 until slots.length())
+        {
+            val rune = JSONObject(slots[k].toString())
+            runes.add(getRuneDTO(rune))
+        }
+
+        return SlotDTO(runes)
+    }
+
+
+
+    fun getRuneDTO(rune : JSONObject) : RuneDTO
+    {
+        val id = rune["id"].toString()
+        val key = rune["key"].toString()
+        val icon = rune["icon"].toString()
+        val name = rune["name"].toString()
+        val shortDesc = rune["shortDesc"].toString()
+        val longDesc = rune["longDesc"].toString()
+
+        return RuneDTO(id, key, icon, name, shortDesc, longDesc)
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
     suspend fun getItemIcon(matchInfoDTO : SummaryMatchInfoDTO, index : Int) : Bitmap
     {

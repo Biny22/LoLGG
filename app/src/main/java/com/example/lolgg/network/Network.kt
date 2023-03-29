@@ -18,7 +18,7 @@ import java.util.*
 
 class Network {
 
-    private val apiKey = "RGAPI-0cc3c992-cff7-4f50-8095-5cc91ed2aa29"
+    private val apiKey = "RGAPI-251b41b3-7e65-4d62-97b1-ec2b1cb82702"
     var summonerDTO : SummonerDTO
 
 
