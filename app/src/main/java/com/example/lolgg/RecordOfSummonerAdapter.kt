@@ -3,13 +3,14 @@ package com.example.lolgg
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.beust.klaxon.JsonArray
 import com.example.lolgg.network.Network
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -34,6 +35,8 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
         val gameModeTextView : TextView
         val dateTextView : TextView
         val periodTextView : TextView
+        val resultTextView : TextView
+        val linearLayout : LinearLayout
 
         init {
             itemImgView = getItemView()
@@ -45,6 +48,8 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
             gameModeTextView = view.findViewById(R.id.gameMode)
             dateTextView = view.findViewById(R.id.date)
             periodTextView = view.findViewById(R.id.period)
+            resultTextView = view.findViewById(R.id.result)
+            linearLayout = view.findViewById(R.id.linearLayout)
         }
 
         private fun getItemView(): MutableList<ImageView> {
@@ -90,6 +95,8 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
 
     val spellsDTO : SpellsDTO by lazy { getSpells() }
 
+    val runeDTO : RunesForgedDTO by lazy { getRunesReforgedDTO() }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecordViewHolder
     {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.record_item, parent, false)
@@ -119,7 +126,6 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
         if(position == 1)
         {
             getSummaryMatchInfo(1)
-            getRunesReforgedDTO()
         }
 
         // 아이템 아이콘 set
@@ -139,7 +145,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
         // spell 아이콘 set
         for(i in 0 until holder.spellImgView.size)
         {
-            val spellKeyOfSummoner = matchInfoDTO.participants.summonerId[i]
+            val spellKeyOfSummoner = matchInfoDTO.participants.spellId[i]
             for(spell in spellsDTO.data)
             {
                 if(spell.key != spellKeyOfSummoner)
@@ -150,6 +156,26 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
                     spellIcon = getSpellIcon(spell)
                 }
                 holder.spellImgView[i].setImageBitmap(spellIcon)
+            }
+        }
+
+        for(i in 0 until holder.runeImgView.size)
+        {
+            val runeIdOfSummoner = matchInfoDTO.participants.runeOfSummonerDTO.styles.styles[i].style
+            println("사용자의 룬 id : $runeIdOfSummoner")
+            for(rune in runeDTO.dataId)
+            {
+                if(rune != runeIdOfSummoner)
+                    continue
+
+
+                val runeIcon : Bitmap
+                runBlocking {
+                    runeIcon = getRuneIcon(rune)
+                }
+                holder.runeImgView[i].setImageBitmap(runeIcon)
+
+
             }
         }
 
@@ -164,11 +190,37 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
         val date = matchInfoDTO.gameEndTimestamp.toLong()
         val dateFormat = SimpleDateFormat("MM월 dd일")
         holder.dateTextView.text = dateFormat.format(date)
+
+        val result = matchInfoDTO.participants.win as Boolean
+        if(result)
+        {
+            holder.linearLayout.background = Drawable(R.color.victoryColor
+        }
+        else
+        {
+
+        }
     }
 
     override fun getItemCount(): Int {
         return matches.size
     }
+
+    suspend fun getRuneIcon(rune : String) : Bitmap
+    {
+        val bitmap : Bitmap
+        withContext(Dispatchers.IO) {
+            val requestURL = "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/perk-images/styles/sorcery/waterwalking/waterwalking.png"
+            val url = URL(requestURL)
+            val httpURLConnection = url.openConnection() as HttpURLConnection
+            val inputStream = httpURLConnection.inputStream
+            bitmap = BitmapFactory.decodeStream(inputStream)
+        }
+
+        return bitmap
+    }
+
+
 
 
     suspend fun requestRunesReforgedDTO() : JSONArray
@@ -211,37 +263,33 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
             val name = json["name"].toString()
 
             val slotsArray = JSONArray(json["slots"].toString())
-            //val runeDataDTO =
+            val slots = getSlots(slotsArray)
 
+            data.add(RuneDataDTO(id, key, icon, name, slots))
             dataId.add(id)
         }
 
         return RunesForgedDTO(dataId, data)
     }
 
-
-    // 파라미터 : 지배 룬
     fun getSlots(slotsArray : JSONArray) : List<SlotDTO>
     {
-        // 여기에 각 슬롯이 옴
-        // [ 룬 슬롯 1, 룬슬롯2, 룬슬롯 3 ]
         val slots = mutableListOf<SlotDTO>()
 
         for(j in 0 until slotsArray.length())
         {
             val runePaths = JSONObject(slotsArray[j].toString())
             val array = JSONArray(runePaths["runes"].toString())
+
             slots.add(getSlotDTO(array))
         }
+        // slots 하나가 지배룬 전체, 영감룬 전체
 
         return slots
     }
 
-
-
     fun getSlotDTO(slots : JSONArray) : SlotDTO
     {
-        // [감전, 포식자...]
         val runes = mutableListOf<RuneDTO>()
         for(k in 0 until slots.length())
         {
@@ -251,8 +299,6 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
 
         return SlotDTO(runes)
     }
-
-
 
     fun getRuneDTO(rune : JSONObject) : RuneDTO
     {
@@ -438,22 +484,63 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
         val championId = p["championId"].toString()
         val championName = p["championName"].toString()
         val deaths = p["deaths"].toString()
-        val items = mutableListOf<String>()
+
+        // 아이템템
+       val items = mutableListOf<String>()
         for(i in 0..6)
         {
             val item = p["item$i"].toString()
             items.add(item)
         }
         val win = p["win"] as Boolean
-        val summonerId = mutableListOf<String>()
+
+        // 스펠
+        val spellId = mutableListOf<String>()
         for(i in 1..2)
         {
-            summonerId.add(p["summoner${i}Id"].toString())
+            spellId.add(p["summoner${i}Id"].toString())
         }
+
+        // 킬
         val kill = p["kills"].toString()
 
+        val perks = JSONObject(p["perks"].toString())
+
+        // 능력치 룬
+       val ss = JSONObject(perks["statPerks"].toString())
+        val defense = ss["defense"].toString()
+        val flex = ss["flex"].toString()
+        val offense = ss["offense"].toString()
+        val statPerks = StatsPerksOfSummonerDTO(defense, flex, offense)
+
+        val stylesJson = JSONArray(perks["styles"].toString())
+        val styles = mutableListOf<StyleDTO>()
+
+        for(i in 0 until stylesJson.length())
+        {
+            val s = JSONObject(stylesJson[i].toString())
+            val description = s["description"].toString()
+            val sel = JSONArray(s["selections"].toString())
+            val runeId = mutableListOf<String>()
+            val style = s["style"].toString()
+
+            for(j in 0 until sel.length())
+            {
+                val path = JSONObject(sel[j].toString())
+                runeId.add(path["perk"].toString())
+            }
+
+            val styleDTO = StyleDTO(description, runeId, style)
+            styles.add(styleDTO)
+        }
+
+        val stylesDTO = StylesDTO(styles)
+        val runeOfSummonerDTO = RuneOfSummonerDTO(statPerks, stylesDTO)
+
+        // 역;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 홍성희
+
         val summaryParticipantDTO = SummaryParticipantDTO(assists, championId, championName,
-            deaths, items, kill,summonerId, win)
+            deaths, items, kill,runeOfSummonerDTO, spellId, win)
         val summaryMatchInfoDTO = SummaryMatchInfoDTO(gameCreation, gameStartTimeStamp, gameEndTimeStamp,
             gameMode, gameType, summaryParticipantDTO)
 
