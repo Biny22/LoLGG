@@ -6,8 +6,10 @@ data class SummaryMatchDTO(val matchInfoDTO : SummaryMatchInfoDTO)
 data class SummaryMatchInfoDTO(val gameCreation : String, val gameStartTimestamp : String, val gameEndTimestamp : String,
                         val queueId : String, val gameType : String, val participants : SummaryParticipantDTO)
 
-data class SummaryParticipantDTO(val assists : String, val championId : String, val championName : String, val deaths : String,
+data class SummaryParticipantDTO(val assists : String, val championId : String, val championName : String, val challenges : ChallengesDTO, val deaths : String,
                                  val items : List<String>, val kill : String, val runeOfSummonerDTO : RuneOfSummonerDTO, val spellId : List<String>, val win : Boolean)
+
+data class ChallengesDTO(val killParticipation : String)
 
 data class RuneOfSummonerDTO(val statsPerks : StatPerksDTO, val primaryStyle : StyleDTO, val subStyle : StyleDTO)
 

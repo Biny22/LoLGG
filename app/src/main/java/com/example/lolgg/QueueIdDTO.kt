@@ -25,7 +25,7 @@ fun getQueueId() : MutableMap<String, String>
     queueId["420"] = "솔로 랭크"
     queueId["430"] = "일반 게임"
     queueId["440"] = "자유 랭크"
-    queueId["450"] = "칼바람의 나락 : 무작위"
+    queueId["450"] = "칼바람의 나락" // 무작위
     queueId["600"] = "불의 축제"
     queueId["610"] = "암흑의 별"
     queueId["700"] = "소환사의 협곡 : 격전"
@@ -56,6 +56,6 @@ fun getQueueId() : MutableMap<String, String>
     queueId["2000"] = "튜토리얼 1"
     queueId["2010"] = "튜토리얼 2"
     queueId["2020"] = "튜토리얼 3"
-
+    //홍성희
     return queueId
 }

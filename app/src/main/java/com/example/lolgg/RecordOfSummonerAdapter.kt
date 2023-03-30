@@ -160,29 +160,6 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
             }
         }
 
-        /*
-        for(i in 0 until holder.runeImgView.size)
-        {
-            val runeIdOfSummoner = matchInfoDTO.participants.runeOfSummonerDTO.styles.styles[i].style
-            println("사용자의 룬 id : $runeIdOfSummoner")
-            for(rune in runeDTO.dataId)
-            {
-                if(rune != runeIdOfSummoner)
-                    continue
-
-
-                val runeIcon : Bitmap
-                runBlocking {
-                    runeIcon = getRuneIcon(rune)
-                }
-                holder.runeImgView[i].setImageBitmap(runeIcon)
-
-
-            }
-        }
-
-         */
-
         // primaryStyle
         for(runePath in runeDTO.data)
         {
@@ -257,6 +234,10 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
             holder.linearLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.defeatColor))
             holder.resultTextView.text = "패배"
         }
+
+        // killRate set
+        val killRate = matchInfoDTO.participants.challenges.killParticipation
+        holder.killRateTextView.text = killRate
     }
 
     override fun getItemCount(): Int {
@@ -276,9 +257,6 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
 
         return bitmap
     }
-
-
-
 
     suspend fun requestRunesReforgedDTO() : JSONArray
     {
@@ -540,6 +518,10 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         val championName = p["championName"].toString()
         val deaths = p["deaths"].toString()
 
+        val challenges = JSONObject(p["challenges"].toString())
+        val killParticipation = challenges["killParticipation"].toString()
+        val challengesDTO = ChallengesDTO(killParticipation)
+
         // 아이템템
        val items = mutableListOf<String>()
         for(i in 0..6)
@@ -594,7 +576,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         // 역;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 홍성희
 
         val summaryParticipantDTO = SummaryParticipantDTO(assists, championId, championName,
-            deaths, items, kill,runeOfSummonerDTO, spellId, win)
+            challengesDTO, deaths, items, kill,runeOfSummonerDTO, spellId, win)
         val summaryMatchInfoDTO = SummaryMatchInfoDTO(gameCreation, gameStartTimeStamp, gameEndTimeStamp,
             queueId, gameType, summaryParticipantDTO)
 
