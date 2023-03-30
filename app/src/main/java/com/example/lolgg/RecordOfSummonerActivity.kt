@@ -1,5 +1,7 @@
 package com.example.lolgg
 
+import android.app.Application
+import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.widget.ImageView
@@ -29,7 +31,7 @@ class RecordOfSummonerActivity : AppCompatActivity() {
         val championsDTO = network.getChampionsDTO()
 
         val recyclerView = findViewById<RecyclerView>(R.id.recordOfSummoner)
-        val recyclerViewAdapter = RecordOfSummonerAdapter(summonerDTO)
+        val recyclerViewAdapter = RecordOfSummonerAdapter(summonerDTO, baseContext)
         recyclerView.adapter = recyclerViewAdapter
 
         runBlocking {

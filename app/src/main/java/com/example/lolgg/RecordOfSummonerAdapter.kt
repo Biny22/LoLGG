@@ -1,15 +1,16 @@
 package com.example.lolgg
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lolgg.network.Network
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +23,7 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
 
-class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerView.Adapter<RecordOfSummonerAdapter.RecordViewHolder>() {
+class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val context: Context) : RecyclerView.Adapter<RecordOfSummonerAdapter.RecordViewHolder>() {
     inner class RecordViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
         // 여기서 레이아웃 구성 요소 가져오기
         // 리스너 등록
@@ -83,7 +84,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
     }
 
     private val network : Network = Network(summonerDTO)
-    val apiKey = "RGAPI-251b41b3-7e65-4d62-97b1-ec2b1cb82702"
+    val apiKey = "RGAPI-b02fb073-a130-4272-851f-b672dc7d8f5d"
 
     private val matches : MutableList<String> by lazy {
         runBlocking {
@@ -112,7 +113,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
 
         // 게임 진행 시간 set
         val timestamp  = matchInfoDTO.gameEndTimestamp.toLong() - matchInfoDTO.gameStartTimestamp.toLong()
-        val periodFormat = SimpleDateFormat("mm분 ss초")
+        val periodFormat = SimpleDateFormat("mm : ss")
         holder.periodTextView.text = periodFormat.format(timestamp)
 
         // 챔피온 아이콘 set
@@ -159,6 +160,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
             }
         }
 
+        /*
         for(i in 0 until holder.runeImgView.size)
         {
             val runeIdOfSummoner = matchInfoDTO.participants.runeOfSummonerDTO.styles.styles[i].style
@@ -179,11 +181,64 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
             }
         }
 
+         */
+
+        // primaryStyle
+        for(runePath in runeDTO.data)
+        {
+            if(runePath.id != matchInfoDTO.participants.runeOfSummonerDTO.primaryStyle.style)
+                continue
+
+            // 룬 경로가 같다면
+            for(rune in runePath.slots[0].runes)
+            {
+                // rune 은 왕룬임
+                if(rune.id != matchInfoDTO.participants.runeOfSummonerDTO.primaryStyle.runeId[0])
+                    continue
+
+                // 동일한 룬이라면
+                val runeIcon : Bitmap
+                runBlocking {
+                    runeIcon = getRuneIcon(rune.icon)
+                }
+                holder.runeImgView[0].setImageBitmap(runeIcon)
+                break
+            }
+            break
+        }
+
+        // 보조 룬
+        for(runePath in runeDTO.data)
+        {
+            if(runePath.id != matchInfoDTO.participants.runeOfSummonerDTO.subStyle.style)
+                continue
+
+            // 룬 경로가 같다면
+            val runeIcon : Bitmap
+            runBlocking {
+                runeIcon = getRuneIcon(runePath.icon)
+            }
+            holder.runeImgView[1].setImageBitmap(runeIcon)
+            break
+        }
+
+        // gameMode
+        val queueId = getQueueId()
+        for(key in queueId.keys)
+        {
+            if(key != matchInfoDTO.queueId)
+                continue
+
+            val gameMode = queueId[key]
+            holder.gameModeTextView.text = gameMode
+        }
+
+
         // kda set
         val kill = matchInfoDTO.participants.kill
         val death = matchInfoDTO.participants.deaths
         val assist = matchInfoDTO.participants.assists
-        val kda = "$kill/$death/$assist"
+        val kda = "$kill / $death / $assist"
         holder.kdaTextView.text = kda
 
         // date set
@@ -194,11 +249,13 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
         val result = matchInfoDTO.participants.win as Boolean
         if(result)
         {
-            holder.linearLayout.background = Drawable(R.color.victoryColor
+            holder.linearLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.victoryColor))
+            holder.resultTextView.text = "승리"
         }
         else
         {
-
+            holder.linearLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.defeatColor))
+            holder.resultTextView.text = "패배"
         }
     }
 
@@ -206,11 +263,11 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
         return matches.size
     }
 
-    suspend fun getRuneIcon(rune : String) : Bitmap
+    suspend fun getRuneIcon(runeIcon : String) : Bitmap
     {
         val bitmap : Bitmap
         withContext(Dispatchers.IO) {
-            val requestURL = "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/perk-images/styles/sorcery/waterwalking/waterwalking.png"
+            val requestURL = "https://ddragon.canisback.com/img/$runeIcon"
             val url = URL(requestURL)
             val httpURLConnection = url.openConnection() as HttpURLConnection
             val inputStream = httpURLConnection.inputStream
@@ -249,7 +306,6 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
 
     fun getRuneDataDTO(runesReforgedJson : JSONArray) : RunesForgedDTO
     {
-        val dataId = mutableListOf<String>()
         val data = mutableListOf<RuneDataDTO>()
 
         for(i in 0 until runesReforgedJson.length())
@@ -266,10 +322,9 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
             val slots = getSlots(slotsArray)
 
             data.add(RuneDataDTO(id, key, icon, name, slots))
-            dataId.add(id)
         }
 
-        return RunesForgedDTO(dataId, data)
+        return RunesForgedDTO(data)
     }
 
     fun getSlots(slotsArray : JSONArray) : List<SlotDTO>
@@ -473,7 +528,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
         val gameCreation = infodata["gameCreation"].toString()
         val gameStartTimeStamp = infodata["gameStartTimestamp"].toString()
         val gameEndTimeStamp = infodata["gameEndTimestamp"].toString()
-        val gameMode = infodata["gameMode"].toString()
+        val queueId = infodata["queueId"].toString()
         val gameType = infodata["gameType"].toString()
         val participantsData = JSONArray(infodata["participants"].toString())
 
@@ -511,7 +566,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
         val defense = ss["defense"].toString()
         val flex = ss["flex"].toString()
         val offense = ss["offense"].toString()
-        val statPerks = StatsPerksOfSummonerDTO(defense, flex, offense)
+        val statPerks = StatPerksDTO(defense, flex, offense)
 
         val stylesJson = JSONArray(perks["styles"].toString())
         val styles = mutableListOf<StyleDTO>()
@@ -534,15 +589,14 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO) : RecyclerV
             styles.add(styleDTO)
         }
 
-        val stylesDTO = StylesDTO(styles)
-        val runeOfSummonerDTO = RuneOfSummonerDTO(statPerks, stylesDTO)
+        val runeOfSummonerDTO = RuneOfSummonerDTO(statPerks, styles[0], styles[1])
 
         // 역;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 홍성희
 
         val summaryParticipantDTO = SummaryParticipantDTO(assists, championId, championName,
             deaths, items, kill,runeOfSummonerDTO, spellId, win)
         val summaryMatchInfoDTO = SummaryMatchInfoDTO(gameCreation, gameStartTimeStamp, gameEndTimeStamp,
-            gameMode, gameType, summaryParticipantDTO)
+            queueId, gameType, summaryParticipantDTO)
 
         return summaryMatchInfoDTO
     }

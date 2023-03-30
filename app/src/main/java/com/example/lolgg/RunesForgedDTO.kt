@@ -1,6 +1,6 @@
 package com.example.lolgg
 
-data class RunesForgedDTO(val dataId : List<String>, val data : List<RuneDataDTO>)
+data class RunesForgedDTO(val data : List<RuneDataDTO>)
 
 data class RuneDataDTO(val id : String, val key : String, val icon : String, val name : String, val slots : List<SlotDTO>)
 

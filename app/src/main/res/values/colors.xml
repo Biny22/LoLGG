@@ -10,4 +10,5 @@
     <color name="victoryColor">#4CAFDC</color>
     <color name="defeatColor">#DC504C</color>
     <color name="replayColor">#6A6A6A</color>
+    <color name="bg1">#F5141416</color>
 </resources>
