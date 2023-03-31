@@ -4,9 +4,11 @@ import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lolgg.network.Network
 import kotlinx.coroutines.runBlocking
@@ -33,12 +35,24 @@ class RecordOfSummonerActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.recordOfSummoner)
         val recyclerViewAdapter = RecordOfSummonerAdapter(summonerDTO, baseContext)
         recyclerView.adapter = recyclerViewAdapter
+        recyclerView.addItemDecoration(SpaceItemDecoration(0,10))
+
+        val inGameButton = findViewById<Button>(R.id.inGameButton)
+        inGameButton.setBackgroundResource(R.drawable.round_ex1)
+        val refreshButton = findViewById<Button>(R.id.refreshButton)
+        refreshButton.setBackgroundResource(R.drawable.round_ex2)
+
 
         runBlocking {
             profileIconBitmap = network.getProFileIcon()!!
             mostChampionViewBitmap = network.getMostChampionView()!!
         }
-        profileIconView.setImageBitmap(profileIconBitmap)
+
+        val draw =  RoundedBitmapDrawableFactory.create(resources,profileIconBitmap)
+        draw.cornerRadius = 75.0f
+        profileIconView.setImageDrawable(draw)
+        //profileIconView.setImageBitmap(profileIconBitmap)
+
         mostChampionView.setImageBitmap(mostChampionViewBitmap)
        // println(s)
     }

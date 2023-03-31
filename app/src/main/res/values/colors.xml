@@ -11,4 +11,7 @@
     <color name="defeatColor">#DC504C</color>
     <color name="replayColor">#6A6A6A</color>
     <color name="bg1">#F5141416</color>
+    <color name="aa">#001D3D</color>
+    <color name="bb">#003566</color>
+    <color name="cc">#2A6F97</color>
 </resources>

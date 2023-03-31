@@ -2,15 +2,19 @@ package com.example.lolgg
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Rect
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.content.ContextCompat
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lolgg.network.Network
 import kotlinx.coroutines.Dispatchers
@@ -37,7 +41,9 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         val dateTextView : TextView
         val periodTextView : TextView
         val resultTextView : TextView
+
         val linearLayout : LinearLayout
+        val container : ConstraintLayout
 
         init {
             itemImgView = getItemView()
@@ -51,6 +57,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
             periodTextView = view.findViewById(R.id.period)
             resultTextView = view.findViewById(R.id.result)
             linearLayout = view.findViewById(R.id.linearLayout)
+            container = view.findViewById(R.id.recordItem)
         }
 
         private fun getItemView(): MutableList<ImageView> {
@@ -98,9 +105,12 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
 
     val runeDTO : RunesForgedDTO by lazy { getRunesReforgedDTO() }
 
+    private lateinit var resources : Resources
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecordViewHolder
     {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.record_item, parent, false)
+        resources = parent.resources
         return RecordViewHolder(view)
     }
 
@@ -121,7 +131,9 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         runBlocking {
             championIcon = requestChampionIcon(matchInfoDTO)
         }
-        holder.championImgView.setImageBitmap(championIcon)
+        val drawable =  RoundedBitmapDrawableFactory.create(resources,championIcon)
+        drawable.cornerRadius = 50.0f
+        holder.championImgView.setImageDrawable(drawable)
 
         // test
         if(position == 1)
@@ -134,13 +146,16 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         {
             val itemId = matchInfoDTO.participants.items[i]
             if(itemId == "0")
+            {
+                holder.itemImgView[i].setBackgroundResource(R.drawable.round_ex3)
                 continue
+            }
 
             val itemIcon : Bitmap
             runBlocking {
                 itemIcon = getItemIcon(matchInfoDTO, i)
             }
-            holder.itemImgView[i].setImageBitmap(itemIcon)
+            setImageDrawable(holder.itemImgView[i], itemIcon)
         }
 
         // spell 아이콘 set
@@ -156,7 +171,8 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
                 runBlocking {
                     spellIcon = getSpellIcon(spell)
                 }
-                holder.spellImgView[i].setImageBitmap(spellIcon)
+
+                setImageDrawable(holder.spellImgView[i], spellIcon)
             }
         }
 
@@ -178,7 +194,8 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
                 runBlocking {
                     runeIcon = getRuneIcon(rune.icon)
                 }
-                holder.runeImgView[0].setImageBitmap(runeIcon)
+
+                setImageDrawable(holder.runeImgView[0], runeIcon)
                 break
             }
             break
@@ -195,7 +212,8 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
             runBlocking {
                 runeIcon = getRuneIcon(runePath.icon)
             }
-            holder.runeImgView[1].setImageBitmap(runeIcon)
+
+            setImageDrawable(holder.runeImgView[1], runeIcon)
             break
         }
 
@@ -226,22 +244,33 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         val result = matchInfoDTO.participants.win as Boolean
         if(result)
         {
-            holder.linearLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.victoryColor))
+            holder.linearLayout.setBackgroundResource(R.drawable.round_victory)
             holder.resultTextView.text = "승리"
         }
         else
         {
-            holder.linearLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.defeatColor))
+            holder.linearLayout.setBackgroundResource(R.drawable.round_defeat)
             holder.resultTextView.text = "패배"
         }
 
         // killRate set
-        val killRate = matchInfoDTO.participants.challenges.killParticipation
-        holder.killRateTextView.text = killRate
+        val killRate = matchInfoDTO.participants.challenges.killParticipation.toDouble() * 100
+        holder.killRateTextView.text = "${killRate.toInt()} %"
+
+        holder.container.setBackgroundResource(R.drawable.round_ex1)
+        holder.container.clipToOutline = true // 테두리 바깥으로 튀어나가지 않게 함
     }
 
     override fun getItemCount(): Int {
         return matches.size
+    }
+
+    fun setImageDrawable(imageView : ImageView, bitmap : Bitmap)
+    {
+        val drawable =  RoundedBitmapDrawableFactory.create(resources,bitmap)
+        drawable.cornerRadius = 25.0f
+
+        imageView.setImageDrawable(drawable)
     }
 
     suspend fun getRuneIcon(runeIcon : String) : Bitmap
@@ -608,4 +637,22 @@ data class ItemDTO(val name : String, val description : String, val plaintext : 
                    val image : String, val gold : ItemGoldDTO)
 
 data class ItemGoldDTO(val base : String, val total : String)
+
+class SpaceItemDecoration(private val spanCount: Int, private val space: Int) : RecyclerView.ItemDecoration() {
+    override fun getItemOffsets(
+        outRect: Rect,
+        view: View,
+        parent: RecyclerView,
+        state: RecyclerView.State
+    ) {
+        val position = parent.getChildAdapterPosition(view)
+
+        /** 첫번째 행(row-1) 이후부터 있는 아이템에만 상단에 [space] 만큼의 여백을 추가한다. 즉, 첫번째 행에 있는 아이템에는 상단에 여백을 주지 않는다.*/
+        if (position >= spanCount){
+            outRect.top = space
+            outRect.left = space
+            outRect.right = space
+        }
+    }
+}
 

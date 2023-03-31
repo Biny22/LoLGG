@@ -31,36 +31,40 @@
     <TextView
         android:id="@+id/gameMode"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="20dp"
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
-        android:text="무작위 총력전"
-        android:textColor="@color/white"
         android:fontFamily="@font/maplestory_light"
+        android:gravity="fill_vertical"
+        android:text="game mode"
+        android:textColor="@color/white"
         app:layout_constraintStart_toEndOf="@+id/kda"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/killRate"
-        android:layout_width="81dp"
-        android:layout_height="24dp"
+        android:layout_width="110dp"
+        android:layout_height="25dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="4dp"
+        android:fontFamily="@font/maplestory_light"
         android:text="킬 관여율"
         android:textColor="@color/white"
-        app:layout_constraintStart_toEndOf="@+id/perksSubStyleImgView"
+        android:gravity="center_vertical"
+        app:layout_constraintStart_toEndOf="@+id/perksPrimaryStyleImgView"
         app:layout_constraintTop_toBottomOf="@+id/kda" />
 
     <TextView
         android:id="@+id/kda"
-        android:layout_width="112dp"
-        android:layout_height="31dp"
+        android:layout_width="110dp"
+        android:layout_height="20dp"
         android:layout_marginStart="8dp"
-        android:text="0/0/0"
-        android:fontFamily="@font/maplestory_light"
-        android:textSize="18sp"
-        android:textColor="@color/white"
         android:layout_marginTop="10dp"
+        android:fontFamily="@font/maplestory_bold"
+        android:text="0/0/0"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:gravity="center_vertical"
         app:layout_constraintStart_toEndOf="@+id/perksPrimaryStyleImgView"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -70,28 +74,28 @@
         android:layout_height="18dp"
         android:layout_marginStart="10dp"
         android:layout_marginTop="5dp"
+        android:fontFamily="@font/maplestory_light"
         android:text="3월 1일"
         android:textColor="@color/white"
-        android:fontFamily="@font/maplestory_light"
         app:layout_constraintStart_toEndOf="@+id/kda"
         app:layout_constraintTop_toBottomOf="@+id/gameMode" />
 
     <ImageView
         android:id="@+id/perksSubStyleImgView"
-        android:layout_width="23dp"
-        android:layout_height="23dp"
-        android:layout_marginStart="9dp"
-        android:layout_marginTop="3dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="5dp"
         app:layout_constraintStart_toEndOf="@+id/spellImgView2"
         app:layout_constraintTop_toBottomOf="@+id/perksPrimaryStyleImgView"
         tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
         android:id="@+id/perksPrimaryStyleImgView"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
         android:layout_marginStart="5dp"
-        android:layout_marginTop="7dp"
+        android:layout_marginTop="9dp"
         app:layout_constraintStart_toEndOf="@+id/spellImgView1"
         app:layout_constraintTop_toTopOf="parent"
         tools:srcCompat="@tools:sample/avatars" />
@@ -114,87 +118,83 @@
         android:layout_marginTop="80dp"
         app:layout_constraintStart_toEndOf="@+id/linearLayout"
         app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@tools:sample/avatars"
-        android:background="@color/replayColor"/>
+        tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
         android:id="@+id/itemImgView2"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="4dp"
         android:layout_marginTop="80dp"
         app:layout_constraintStart_toEndOf="@+id/itemImgView1"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_marginStart="10dp"
-        tools:srcCompat="@tools:sample/avatars"
-        android:background="@color/replayColor"/>
+        tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
         android:id="@+id/itemImgView3"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="4dp"
         android:layout_marginTop="80dp"
         app:layout_constraintStart_toEndOf="@+id/itemImgView2"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_marginStart="10dp"
-        tools:srcCompat="@tools:sample/avatars"
-        android:background="@color/replayColor"/>
+        tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
         android:id="@+id/itemImgView7"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="4dp"
         android:layout_marginTop="80dp"
         app:layout_constraintStart_toEndOf="@+id/itemImgView6"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_marginStart="10dp"
-        tools:srcCompat="@tools:sample/avatars"
-        android:background="@color/replayColor"/>
+        tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
         android:id="@+id/itemImgView4"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="4dp"
         android:layout_marginTop="80dp"
         app:layout_constraintStart_toEndOf="@+id/itemImgView3"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_marginStart="10dp"
-        tools:srcCompat="@tools:sample/avatars"
-        android:background="@color/replayColor"/>
+        tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
         android:id="@+id/itemImgView5"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="4dp"
         android:layout_marginTop="80dp"
         app:layout_constraintStart_toEndOf="@+id/itemImgView4"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_marginStart="10dp"
-        tools:srcCompat="@tools:sample/avatars"
-        android:background="@color/replayColor"/>
+        tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
         android:id="@+id/itemImgView6"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="4dp"
         android:layout_marginTop="80dp"
         app:layout_constraintStart_toEndOf="@+id/itemImgView5"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_marginStart="10dp"
-        tools:srcCompat="@tools:sample/avatars"
-        android:background="@color/replayColor"/>
+        tools:srcCompat="@tools:sample/avatars" />
 
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="55dp"
-        android:layout_height="105dp"
+        android:layout_height="match_parent"
         android:background="#4CAFDC"
         android:orientation="vertical"
+        android:layout_marginTop="3dp"
+        android:layout_marginStart="3dp"
+        android:layout_marginBottom="3dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -204,21 +204,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:text="승리"
-            android:textColor="@color/white"
+            android:fontFamily="@font/maplestory_bold"
             android:gravity="center"
-            android:fontFamily="@font/maplestory_light"/>
+            android:textSize="18sp"
+            android:text="승리"
+            android:textColor="@color/white" />
 
         <TextView
             android:id="@+id/period"
             android:layout_width="57dp"
             android:layout_height="24dp"
             android:layout_marginTop="5dp"
+            android:fontFamily="@font/maplestory_light"
+            android:gravity="center"
             android:text="17 : 15"
             android:textColor="@color/white"
-            android:gravity="center"
-            android:textSize="12sp"
-            android:fontFamily="@font/maplestory_light"/>
+            android:textSize="12sp" />
 
     </LinearLayout>
 
