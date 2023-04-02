@@ -4,14 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/recordItem"
     android:layout_width="match_parent"
-    android:layout_height="115dp"
-    android:background="#4C4C4C">
+    android:layout_height="115dp">
 
     <ImageView
         android:id="@+id/championImgView"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_marginStart="7dp"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="8dp"
         app:layout_constraintStart_toEndOf="@+id/linearLayout"
         app:layout_constraintTop_toTopOf="parent"
@@ -22,9 +21,9 @@
         android:id="@+id/spellImgView2"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        android:layout_marginStart="72dp"
+        android:layout_marginStart="9dp"
         android:layout_marginTop="5dp"
-        app:layout_constraintStart_toStartOf="@+id/championImgView"
+        app:layout_constraintStart_toEndOf="@+id/championImgView"
         app:layout_constraintTop_toBottomOf="@+id/spellImgView1"
         tools:srcCompat="@tools:sample/avatars" />
 
@@ -32,12 +31,12 @@
         android:id="@+id/gameMode"
         android:layout_width="wrap_content"
         android:layout_height="20dp"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="5dp"
         android:layout_marginTop="10dp"
-        android:fontFamily="@font/maplestory_light"
         android:gravity="fill_vertical"
         android:text="game mode"
         android:textColor="@color/white"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/kda"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -47,10 +46,9 @@
         android:layout_height="25dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="4dp"
-        android:fontFamily="@font/maplestory_light"
+        android:gravity="center_vertical"
         android:text="킬 관여율"
         android:textColor="@color/white"
-        android:gravity="center_vertical"
         app:layout_constraintStart_toEndOf="@+id/perksPrimaryStyleImgView"
         app:layout_constraintTop_toBottomOf="@+id/kda" />
 
@@ -60,11 +58,11 @@
         android:layout_height="20dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="10dp"
-        android:fontFamily="@font/maplestory_bold"
+        android:gravity="center_vertical"
         android:text="0/0/0"
         android:textColor="@color/white"
         android:textSize="18sp"
-        android:gravity="center_vertical"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/perksPrimaryStyleImgView"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -72,10 +70,10 @@
         android:id="@+id/date"
         android:layout_width="79dp"
         android:layout_height="18dp"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="5dp"
         android:layout_marginTop="5dp"
-        android:fontFamily="@font/maplestory_light"
         android:text="3월 1일"
+        android:textStyle="bold"
         android:textColor="@color/white"
         app:layout_constraintStart_toEndOf="@+id/kda"
         app:layout_constraintTop_toBottomOf="@+id/gameMode" />
@@ -104,7 +102,7 @@
         android:id="@+id/spellImgView1"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        android:layout_marginStart="12dp"
+        android:layout_marginStart="9dp"
         android:layout_marginTop="10dp"
         app:layout_constraintStart_toEndOf="@+id/championImgView"
         app:layout_constraintTop_toTopOf="parent"
@@ -114,7 +112,7 @@
         android:id="@+id/itemImgView1"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        android:layout_marginStart="7dp"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="80dp"
         app:layout_constraintStart_toEndOf="@+id/linearLayout"
         app:layout_constraintTop_toTopOf="parent"
@@ -190,11 +188,11 @@
         android:id="@+id/linearLayout"
         android:layout_width="55dp"
         android:layout_height="match_parent"
+        android:layout_marginStart="3dp"
+        android:layout_marginTop="3dp"
+        android:layout_marginBottom="3dp"
         android:background="#4CAFDC"
         android:orientation="vertical"
-        android:layout_marginTop="3dp"
-        android:layout_marginStart="3dp"
-        android:layout_marginBottom="3dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -204,18 +202,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:fontFamily="@font/maplestory_bold"
             android:gravity="center"
-            android:textSize="18sp"
             android:text="승리"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/period"
             android:layout_width="57dp"
             android:layout_height="24dp"
             android:layout_marginTop="5dp"
-            android:fontFamily="@font/maplestory_light"
             android:gravity="center"
             android:text="17 : 15"
             android:textColor="@color/white"

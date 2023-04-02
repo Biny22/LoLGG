@@ -22,6 +22,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.Serializable
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
@@ -91,7 +92,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
     }
 
     private val network : Network = Network(summonerDTO)
-    val apiKey = "RGAPI-b02fb073-a130-4272-851f-b672dc7d8f5d"
+    val apiKey = "RGAPI-75b617e3-9c00-4f2f-bb61-8716d39b48e6"
 
     private val matches : MutableList<String> by lazy {
         runBlocking {
@@ -99,9 +100,9 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         }
     }
 
-    val itemsDTO : ItemsDTO by lazy { getItem() }
-
     val spellsDTO : SpellsDTO by lazy { getSpells() }
+
+    val itemDTO : ItemsDTO by lazy { getItem() }
 
     val runeDTO : RunesForgedDTO by lazy { getRunesReforgedDTO() }
 
@@ -117,8 +118,6 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
     @SuppressLint("SimpleDateFormat")
     override fun onBindViewHolder(holder: RecordViewHolder, position: Int)
     {
-        // 여기서 꾸미기
-        println(itemsDTO.type)
         val matchInfoDTO = getSummaryMatchInfo(position)
 
         // 게임 진행 시간 set
@@ -374,18 +373,6 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         return RuneDTO(id, key, icon, name, shortDesc, longDesc)
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
     suspend fun getItemIcon(matchInfoDTO : SummaryMatchInfoDTO, index : Int) : Bitmap
     {
         val bitmap : Bitmap
@@ -398,6 +385,54 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         }
 
         return bitmap
+    }
+
+    fun getItem() : ItemsDTO
+    {
+        val items = runBlocking { requestItemsDTO() }
+        val itemsJson = JSONObject(items["data"].toString())
+        val data = mutableListOf<ItemDataDTO>()
+
+        for(key in itemsJson.keys())
+        {
+            val itemJson = JSONObject(itemsJson[key].toString())
+            val name = itemJson["name"].toString()
+            val description = itemJson["description"].toString()
+            val plaintext = itemJson["plaintext"].toString()
+
+            val imageJson = JSONObject(itemJson["image"].toString())
+            val image = imageJson["full"].toString()
+
+            val goldJson = JSONObject(itemJson["gold"].toString())
+            val base = goldJson["base"].toString()
+            val total = goldJson["total"].toString()
+            val itemGoldDTO = ItemGoldDTO(base, total)
+
+            val itemDTO = ItemDTO(name, description, plaintext, image, itemGoldDTO)
+            val itemDataDTO = ItemDataDTO(key, itemDTO)
+            data.add(itemDataDTO)
+        }
+
+        val type = items["type"].toString()
+        val version = items["version"].toString()
+
+        return ItemsDTO(type, version, data)
+    }
+
+    suspend fun requestItemsDTO() : JSONObject
+    {
+        val items : JSONObject
+
+        withContext(Dispatchers.IO) {
+            val requestURL = "https://ddragon.leagueoflegends.com/cdn/13.6.1/data/ko_KR/item.json"
+            val url = URL(requestURL)
+            val httpURLConnection = url.openConnection() as HttpURLConnection
+            val inputStream = httpURLConnection.inputStream
+            val scan = Scanner(inputStream)
+            items = JSONObject(scan.nextLine())
+        }
+
+        return items
     }
 
     suspend fun getSpellIcon(spell: SpellDTO) : Bitmap
@@ -468,54 +503,6 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         return bitmap
     }
 
-    fun getItem() : ItemsDTO
-    {
-        val items = runBlocking { requestItemsDTO() }
-        val itemsJson = JSONObject(items["data"].toString())
-        val data = mutableListOf<ItemDataDTO>()
-
-        for(key in itemsJson.keys())
-        {
-            val itemJson = JSONObject(itemsJson[key].toString())
-            val name = itemJson["name"].toString()
-            val description = itemJson["description"].toString()
-            val plaintext = itemJson["plaintext"].toString()
-
-            val imageJson = JSONObject(itemJson["image"].toString())
-            val image = imageJson["full"].toString()
-
-            val goldJson = JSONObject(itemJson["gold"].toString())
-            val base = goldJson["base"].toString()
-            val total = goldJson["total"].toString()
-            val itemGoldDTO = ItemGoldDTO(base, total)
-
-            val itemDTO = ItemDTO(name, description, plaintext, image, itemGoldDTO)
-            val itemDataDTO = ItemDataDTO(key, itemDTO)
-            data.add(itemDataDTO)
-        }
-
-        val type = items["type"].toString()
-        val version = items["version"].toString()
-
-        return ItemsDTO(type, version, data)
-    }
-
-    suspend fun requestItemsDTO() : JSONObject
-    {
-        val items : JSONObject
-
-        withContext(Dispatchers.IO) {
-            val requestURL = "https://ddragon.leagueoflegends.com/cdn/13.6.1/data/ko_KR/item.json"
-            val url = URL(requestURL)
-            val httpURLConnection = url.openConnection() as HttpURLConnection
-            val inputStream = httpURLConnection.inputStream
-            val scan = Scanner(inputStream)
-            items = JSONObject(scan.nextLine())
-        }
-
-        return items
-    }
-
     fun getSummaryMatchInfo(index : Int) : SummaryMatchInfoDTO
     {
         val matchData = runBlocking { requestSummaryMatchesInfo(matches[index]) }
@@ -531,6 +518,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
                 break
             count++
         }
+        println(matches[index])
 
         val gameCreation = infodata["gameCreation"].toString()
         val gameStartTimeStamp = infodata["gameStartTimestamp"].toString()
@@ -548,7 +536,14 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         val deaths = p["deaths"].toString()
 
         val challenges = JSONObject(p["challenges"].toString())
-        val killParticipation = challenges["killParticipation"].toString()
+        val killParticipation : String
+        if(challenges.has("challenges"))
+            killParticipation = challenges["killParticipation"].toString()
+        else
+            killParticipation = "0"
+
+
+        //killParticipation
         val challengesDTO = ChallengesDTO(killParticipation)
 
         // 아이템템
@@ -629,7 +624,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
 }
 
 
-data class ItemsDTO(val type : String, val version : String, val data : List<ItemDataDTO>)
+data class ItemsDTO(val type : String, val version : String, val data : List<ItemDataDTO>) : Serializable
 
 data class ItemDataDTO(val itemId : String, val itemDTO : ItemDTO)
 

@@ -16,7 +16,7 @@ import kotlinx.coroutines.runBlocking
 class RecordOfSummonerActivity : AppCompatActivity() {
 
     private val summonerDTO by lazy {
-        intent.getSerializableExtra("key") as SummonerDTO
+        intent.getSerializableExtra("getSummoner") as SummonerDTO
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
