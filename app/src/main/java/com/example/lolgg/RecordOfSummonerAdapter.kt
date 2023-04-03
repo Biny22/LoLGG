@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
+import android.view.RoundedCorner
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -16,6 +17,9 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestOptions
 import com.example.lolgg.network.Network
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -134,12 +138,6 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         drawable.cornerRadius = 50.0f
         holder.championImgView.setImageDrawable(drawable)
 
-        // test
-        if(position == 1)
-        {
-            getSummaryMatchInfo(1)
-        }
-
         // 아이템 아이콘 set
         for(i in 0 until holder.itemImgView.size)
         {
@@ -150,11 +148,17 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
                 continue
             }
 
-            val itemIcon : Bitmap
-            runBlocking {
-                itemIcon = getItemIcon(matchInfoDTO, i)
+            for(item in itemDTO.data)
+            {
+                if(itemId != item.itemId)
+                    continue
+
+                val itemIcon = item.itemDTO.image
+                Glide.with(context).load("http://ddragon.leagueoflegends.com/cdn/13.6.1/img/item/$itemIcon")
+                    .apply(RequestOptions.bitmapTransform(RoundedCorners(25))).into(holder.itemImgView[i])
+                break
             }
-            setImageDrawable(holder.itemImgView[i], itemIcon)
+            //setImageDrawable(holder.itemImgView[i], itemIcon!!)
         }
 
         // spell 아이콘 set
@@ -258,6 +262,8 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
 
         holder.container.setBackgroundResource(R.drawable.round_ex1)
         holder.container.clipToOutline = true // 테두리 바깥으로 튀어나가지 않게 함
+
+        println(itemDTO.data[0].itemId)
     }
 
     override fun getItemCount(): Int {
@@ -387,12 +393,28 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         return bitmap
     }
 
+    suspend fun getItemIcon(imageId : String) : Bitmap
+    {
+        val bitmap : Bitmap
+
+        withContext(Dispatchers.IO) {
+            val requestURL = "http://ddragon.leagueoflegends.com/cdn/13.6.1/img/item/${imageId}"
+            val url = URL(requestURL)
+            val httpURLConnection = url.openConnection() as HttpURLConnection
+            val inputStream = httpURLConnection.inputStream
+            bitmap = BitmapFactory.decodeStream(inputStream)
+        }
+
+        return bitmap
+    }
+
     fun getItem() : ItemsDTO
     {
+        // 9초
         val items = runBlocking { requestItemsDTO() }
         val itemsJson = JSONObject(items["data"].toString())
         val data = mutableListOf<ItemDataDTO>()
-
+        var currentTime = 0.0
         for(key in itemsJson.keys())
         {
             val itemJson = JSONObject(itemsJson[key].toString())
@@ -401,17 +423,20 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
             val plaintext = itemJson["plaintext"].toString()
 
             val imageJson = JSONObject(itemJson["image"].toString())
-            val image = imageJson["full"].toString()
+            val imageId = imageJson["full"].toString()
 
             val goldJson = JSONObject(itemJson["gold"].toString())
             val base = goldJson["base"].toString()
             val total = goldJson["total"].toString()
             val itemGoldDTO = ItemGoldDTO(base, total)
 
-            val itemDTO = ItemDTO(name, description, plaintext, image, itemGoldDTO)
+            val itemDTO = ItemDTO(name, description, plaintext, imageId, itemGoldDTO)
             val itemDataDTO = ItemDataDTO(key, itemDTO)
             data.add(itemDataDTO)
         }
+
+        println("아이템 개수 : ${itemsJson.length()}")
+        println("소요 시간 : ${currentTime}")
 
         val type = items["type"].toString()
         val version = items["version"].toString()
@@ -518,7 +543,6 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
                 break
             count++
         }
-        println(matches[index])
 
         val gameCreation = infodata["gameCreation"].toString()
         val gameStartTimeStamp = infodata["gameStartTimestamp"].toString()
@@ -528,7 +552,6 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         val participantsData = JSONArray(infodata["participants"].toString())
 
         val p = JSONObject(participantsData[count].toString())
-        println(p)
 
         val assists = p["assists"].toString()
         val championId = p["championId"].toString()
@@ -537,10 +560,12 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
 
         val challenges = JSONObject(p["challenges"].toString())
         val killParticipation : String
-        if(challenges.has("challenges"))
+        if(challenges.has("killParticipation"))
             killParticipation = challenges["killParticipation"].toString()
         else
             killParticipation = "0"
+
+        println("killParticipants : $killParticipation")
 
 
         //killParticipation
