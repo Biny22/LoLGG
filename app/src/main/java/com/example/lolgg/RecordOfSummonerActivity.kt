@@ -36,6 +36,17 @@ class RecordOfSummonerActivity : AppCompatActivity() {
         val recyclerViewAdapter = RecordOfSummonerAdapter(summonerDTO, baseContext)
         recyclerView.adapter = recyclerViewAdapter
         recyclerView.addItemDecoration(SpaceItemDecoration(0,10))
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+
+                if(recyclerView.canScrollVertically(1))
+                {
+                    print("끝")
+                }
+            }
+        })
 
         val inGameButton = findViewById<Button>(R.id.inGameButton)
         inGameButton.setBackgroundResource(R.drawable.round_ex1)

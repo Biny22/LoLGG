@@ -11,6 +11,7 @@
         <entry key="..\:/Users/cocoa/AndroidStudioProjects/LOLGG/app/src/main/res/layout/fragment_defalut_record_list.xml" value="0.34739583333333335" />
         <entry key="..\:/Users/cocoa/AndroidStudioProjects/LOLGG/app/src/main/res/layout/fragment_general_record.xml" value="0.3619791666666667" />
         <entry key="..\:/Users/cocoa/AndroidStudioProjects/LOLGG/app/src/main/res/layout/fragment_record.xml" value="0.3619791666666667" />
+        <entry key="..\:/Users/cocoa/LoLGG/app/src/main/res/drawable/round_ex3.xml" value="0.3465" />
         <entry key="..\:/Users/cocoa/LoLGG/app/src/main/res/font/maplestory_bold.xml" value="0.3037037037037037" />
         <entry key="..\:/Users/cocoa/LoLGG/app/src/main/res/font/maplestory_light.xml" value="0.39114583333333336" />
         <entry key="..\:/Users/cocoa/LoLGG/app/src/main/res/layout/activity_detail_record.xml" value="0.3619791666666667" />
@@ -19,7 +20,8 @@
         <entry key="..\:/Users/cocoa/LoLGG/app/src/main/res/layout/fragment_defalut_list.xml" value="0.26313405797101447" />
         <entry key="..\:/Users/cocoa/LoLGG/app/src/main/res/layout/fragment_general_record.xml" value="0.26313405797101447" />
         <entry key="..\:/Users/cocoa/LoLGG/app/src/main/res/layout/fragment_record.xml" value="0.26313405797101447" />
-        <entry key="..\:/Users/cocoa/LoLGG/app/src/main/res/layout/record_item.xml" value="0.5" />
+        <entry key="..\:/Users/cocoa/LoLGG/app/src/main/res/layout/record_item.xml" value="1.0" />
+        <entry key="..\:/Users/cocoa/LoLGG/app/src/main/res/layout/record_roading.xml" value="0.3609375" />
       </map>
     </option>
   </component>

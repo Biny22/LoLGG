@@ -6,13 +6,12 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Rect
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
-import android.view.RoundedCorner
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
@@ -34,36 +33,20 @@ import java.util.*
 
 class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val context: Context) : RecyclerView.Adapter<RecordOfSummonerAdapter.RecordViewHolder>() {
     inner class RecordViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
-        // 여기서 레이아웃 구성 요소 가져오기
-        // 리스너 등록
-        val itemImgView: MutableList<ImageView>
-        val spellImgView: MutableList<ImageView>
-        val runeImgView: MutableList<ImageView>
-        val championImgView: ImageView
-        val kdaTextView : TextView
-        val killRateTextView : TextView
-        val gameModeTextView : TextView
-        val dateTextView : TextView
-        val periodTextView : TextView
-        val resultTextView : TextView
 
-        val linearLayout : LinearLayout
-        val container : ConstraintLayout
+        val itemImgView: MutableList<ImageView> = getItemView()
+        val spellImgView: MutableList<ImageView> = getSpellView()
+        val runeImgView: MutableList<ImageView> = getRuneView()
+        val championImgView: ImageView = view.findViewById(R.id.championImgView)
+        val kdaTextView : TextView = view.findViewById(R.id.kda)
+        val killRateTextView : TextView = view.findViewById(R.id.killRate)
+        val gameModeTextView : TextView = view.findViewById(R.id.gameMode)
+        val dateTextView : TextView = view.findViewById(R.id.date)
+        val periodTextView : TextView = view.findViewById(R.id.period)
+        val resultTextView : TextView = view.findViewById(R.id.result)
 
-        init {
-            itemImgView = getItemView()
-            spellImgView = getSpellView()
-            runeImgView = getRuneView()
-            championImgView = view.findViewById(R.id.championImgView)
-            kdaTextView = view.findViewById(R.id.kda)
-            killRateTextView = view.findViewById(R.id.killRate)
-            gameModeTextView = view.findViewById(R.id.gameMode)
-            dateTextView = view.findViewById(R.id.date)
-            periodTextView = view.findViewById(R.id.period)
-            resultTextView = view.findViewById(R.id.result)
-            linearLayout = view.findViewById(R.id.linearLayout)
-            container = view.findViewById(R.id.recordItem)
-        }
+        val linearLayout : LinearLayout = view.findViewById(R.id.linearLayout)
+        val container : ConstraintLayout = view.findViewById(R.id.recordItem)
 
         private fun getItemView(): MutableList<ImageView> {
             val list = mutableListOf<ImageView>()
@@ -95,12 +78,22 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         }
     }
 
+    inner class RecordLoadingViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
+        val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
+    }
+
+
+    private val VIEW_TYPE_ITEM = 0
+    private val VIEW_TYPE_LOADING = 0
+
     private val network : Network = Network(summonerDTO)
-    val apiKey = "RGAPI-75b617e3-9c00-4f2f-bb61-8716d39b48e6"
+    val apiKey = "RGAPI-f4eca54f-8bc3-4f1c-862c-3c027973bdb6"
 
     private val matches : MutableList<String> by lazy {
         runBlocking {
-            network.requestMatchId()
+            val start = 0
+            val count = if(start == 0) 20 else 10
+            network.requestMatchId(start, count)
         }
     }
 
@@ -115,36 +108,198 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecordViewHolder
     {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.record_item, parent, false)
-        resources = parent.resources
         return RecordViewHolder(view)
     }
 
-    @SuppressLint("SimpleDateFormat")
     override fun onBindViewHolder(holder: RecordViewHolder, position: Int)
     {
         val matchInfoDTO = getSummaryMatchInfo(position)
 
         // 게임 진행 시간 set
-        val timestamp  = matchInfoDTO.gameEndTimestamp.toLong() - matchInfoDTO.gameStartTimestamp.toLong()
-        val periodFormat = SimpleDateFormat("mm : ss")
-        holder.periodTextView.text = periodFormat.format(timestamp)
+        val gameStartTimestamp = matchInfoDTO.gameStartTimestamp.toLong()
+        val gameEndTimestamp = matchInfoDTO.gameEndTimestamp.toLong()
+        setPeriodTextView(gameStartTimestamp, gameEndTimestamp, holder.periodTextView)
 
         // 챔피온 아이콘 set
-        val championIcon : Bitmap
-        runBlocking {
-            championIcon = requestChampionIcon(matchInfoDTO)
-        }
-        val drawable =  RoundedBitmapDrawableFactory.create(resources,championIcon)
-        drawable.cornerRadius = 50.0f
-        holder.championImgView.setImageDrawable(drawable)
+        val championName = matchInfoDTO.participants.championName
+        setChampionIcon(championName, holder.championImgView)
 
-        // 아이템 아이콘 set
-        for(i in 0 until holder.itemImgView.size)
+        // set itemIcon
+        setItemIcon(holder.itemImgView, matchInfoDTO.participants.items)
+
+        // spell 아이콘 set
+        val spellId = matchInfoDTO.participants.spellId
+        setSpellIcon(spellId, holder.spellImgView)
+
+        // set primaryStyle
+        val primaryStyle = matchInfoDTO.participants.runeOfSummonerDTO.primaryStyle
+        setPrimaryStyleIcon(primaryStyle, holder.runeImgView[0])
+
+        // set subStyle
+        val subStyle = matchInfoDTO.participants.runeOfSummonerDTO.subStyle
+        setSubStyleIcon(subStyle, holder.runeImgView[1])
+
+        // set gameMode
+        setGameMode(matchInfoDTO.queueId, holder.gameModeTextView)
+
+        // set kda
+        setKda(matchInfoDTO.participants, holder.kdaTextView)
+
+        // set date
+        setDate(gameEndTimestamp, holder.dateTextView)
+
+        // set Result
+        val result = matchInfoDTO.participants.win
+        setResult(result, holder.linearLayout, holder.resultTextView)
+
+        // killRate set
+        val killParticipation = matchInfoDTO.participants.challenges.killParticipation
+        setKillRate(killParticipation, holder.killRateTextView)
+
+
+        holder.container.setBackgroundResource(R.drawable.round_ex1)
+        holder.container.clipToOutline = true // 테두리 바깥으로 튀어나가지 않게 함
+
+    }
+
+    override fun getItemCount(): Int {
+        return matches.size
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return matches.size
+    }
+
+
+    fun setChampionIcon(championName : String, championImgView : ImageView)
+    {
+        val requestURL = "http://ddragon.leagueoflegends.com/cdn/13.6.1/img/champion/$championName.png"
+        val radius = 50
+        setIcon(requestURL, radius, championImgView)
+    }
+
+    fun setSpellIcon(spellId : List<String>, spellImgView : MutableList<ImageView>)
+    {
+        for(i in 0 until spellImgView.size)
         {
-            val itemId = matchInfoDTO.participants.items[i]
+            val spellKeyOfSummoner = spellId[i]
+            for(spell in spellsDTO.data)
+            {
+                if(spell.key != spellKeyOfSummoner)
+                    continue
+
+                val requestURL = "http://ddragon.leagueoflegends.com/cdn/13.6.1/img/spell/${spell.id}.png"
+                val radius = 25
+                setIcon(requestURL, radius, spellImgView[i])
+                break
+            }
+        }
+    }
+
+    fun setPrimaryStyleIcon(primaryStyle : StyleDTO, runeImgView : ImageView)
+    {
+        for(runePath in runeDTO.data)
+        {
+            if(runePath.id != primaryStyle.style)
+                continue
+
+            // 룬 경로가 같다면
+            for(rune in runePath.slots[0].runes)
+            {
+                // rune 은 왕룬임
+                if(rune.id != primaryStyle.runeId[0])
+                    continue
+
+                // 동일한 룬이라면
+                val requestURL = "https://ddragon.canisback.com/img/${rune.icon}"
+                val radius = 25
+                setIcon(requestURL, radius, runeImgView)
+                break
+            }
+            break
+        }
+    }
+
+    fun setSubStyleIcon(subStyle : StyleDTO, runeImgView: ImageView)
+    {
+        for(runePath in runeDTO.data)
+        {
+            if(runePath.id != subStyle.style)
+                continue
+
+            // 룬 경로가 같다면
+            val requestURL = "https://ddragon.canisback.com/img/${runePath.icon}"
+            val radius = 25
+            setIcon(requestURL, radius, runeImgView)
+            break
+        }
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    fun setPeriodTextView(gameStartTimestamp : Long, gameEndTimestamp : Long, periodTextView: TextView)
+    {
+        val timestamp  = gameEndTimestamp - gameStartTimestamp
+        val periodFormat = SimpleDateFormat("mm : ss")
+        periodTextView.text = periodFormat.format(timestamp)
+    }
+
+    fun setGameMode(queueId : String, gameModeTextView : TextView)
+    {
+        val queue = getQueueId()
+        for(key in queue.keys)
+        {
+            if(key != queueId)
+                continue
+
+            val gameMode = queue[key]
+            gameModeTextView.text = gameMode
+        }
+    }
+
+    fun setKda(participants : SummaryParticipantDTO, kdaTextView : TextView)
+    {
+        val kill = participants.kill
+        val death = participants.deaths
+        val assist = participants.assists
+        val kda = "$kill / $death / $assist"
+        kdaTextView.text = kda
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    fun setDate(gameEndTimestamp : Long, dateTextView : TextView)
+    {
+        val dateFormat = SimpleDateFormat("MM월 dd일")
+        dateTextView.text = dateFormat.format(gameEndTimestamp)
+    }
+
+    fun setResult(result : Boolean,linearLayout: LinearLayout, resultTextView : TextView)
+    {
+        if(result)
+        {
+            linearLayout.setBackgroundResource(R.drawable.round_victory)
+            resultTextView.text = "승리"
+        }
+        else
+        {
+            linearLayout.setBackgroundResource(R.drawable.round_defeat)
+            resultTextView.text = "패배"
+        }
+    }
+
+    fun setKillRate(killParticipation : String, killRateTextView : TextView)
+    {
+        val killRate = killParticipation.toDouble() * 100
+        killRateTextView.text = "${killRate.toInt()} %"
+    }
+
+    fun setItemIcon(itemImgView : MutableList<ImageView>, items : List<String>)
+    {
+        for(i in 0 until itemImgView.size)
+        {
+            val itemId = items[i]
             if(itemId == "0")
             {
-                holder.itemImgView[i].setBackgroundResource(R.drawable.round_ex3)
+                itemImgView[i].setBackgroundResource(R.drawable.round_ex3)
                 continue
             }
 
@@ -154,142 +309,19 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
                     continue
 
                 val itemIcon = item.itemDTO.image
-                Glide.with(context).load("http://ddragon.leagueoflegends.com/cdn/13.6.1/img/item/$itemIcon")
-                    .apply(RequestOptions.bitmapTransform(RoundedCorners(25))).into(holder.itemImgView[i])
+                val requestURL = "http://ddragon.leagueoflegends.com/cdn/13.6.1/img/item/${itemIcon}"
+                val radius = 25
+                setIcon(requestURL, radius, itemImgView[i])
                 break
             }
             //setImageDrawable(holder.itemImgView[i], itemIcon!!)
         }
-
-        // spell 아이콘 set
-        for(i in 0 until holder.spellImgView.size)
-        {
-            val spellKeyOfSummoner = matchInfoDTO.participants.spellId[i]
-            for(spell in spellsDTO.data)
-            {
-                if(spell.key != spellKeyOfSummoner)
-                    continue
-
-                val spellIcon : Bitmap
-                runBlocking {
-                    spellIcon = getSpellIcon(spell)
-                }
-
-                setImageDrawable(holder.spellImgView[i], spellIcon)
-            }
-        }
-
-        // primaryStyle
-        for(runePath in runeDTO.data)
-        {
-            if(runePath.id != matchInfoDTO.participants.runeOfSummonerDTO.primaryStyle.style)
-                continue
-
-            // 룬 경로가 같다면
-            for(rune in runePath.slots[0].runes)
-            {
-                // rune 은 왕룬임
-                if(rune.id != matchInfoDTO.participants.runeOfSummonerDTO.primaryStyle.runeId[0])
-                    continue
-
-                // 동일한 룬이라면
-                val runeIcon : Bitmap
-                runBlocking {
-                    runeIcon = getRuneIcon(rune.icon)
-                }
-
-                setImageDrawable(holder.runeImgView[0], runeIcon)
-                break
-            }
-            break
-        }
-
-        // 보조 룬
-        for(runePath in runeDTO.data)
-        {
-            if(runePath.id != matchInfoDTO.participants.runeOfSummonerDTO.subStyle.style)
-                continue
-
-            // 룬 경로가 같다면
-            val runeIcon : Bitmap
-            runBlocking {
-                runeIcon = getRuneIcon(runePath.icon)
-            }
-
-            setImageDrawable(holder.runeImgView[1], runeIcon)
-            break
-        }
-
-        // gameMode
-        val queueId = getQueueId()
-        for(key in queueId.keys)
-        {
-            if(key != matchInfoDTO.queueId)
-                continue
-
-            val gameMode = queueId[key]
-            holder.gameModeTextView.text = gameMode
-        }
-
-
-        // kda set
-        val kill = matchInfoDTO.participants.kill
-        val death = matchInfoDTO.participants.deaths
-        val assist = matchInfoDTO.participants.assists
-        val kda = "$kill / $death / $assist"
-        holder.kdaTextView.text = kda
-
-        // date set
-        val date = matchInfoDTO.gameEndTimestamp.toLong()
-        val dateFormat = SimpleDateFormat("MM월 dd일")
-        holder.dateTextView.text = dateFormat.format(date)
-
-        val result = matchInfoDTO.participants.win as Boolean
-        if(result)
-        {
-            holder.linearLayout.setBackgroundResource(R.drawable.round_victory)
-            holder.resultTextView.text = "승리"
-        }
-        else
-        {
-            holder.linearLayout.setBackgroundResource(R.drawable.round_defeat)
-            holder.resultTextView.text = "패배"
-        }
-
-        // killRate set
-        val killRate = matchInfoDTO.participants.challenges.killParticipation.toDouble() * 100
-        holder.killRateTextView.text = "${killRate.toInt()} %"
-
-        holder.container.setBackgroundResource(R.drawable.round_ex1)
-        holder.container.clipToOutline = true // 테두리 바깥으로 튀어나가지 않게 함
-
-        println(itemDTO.data[0].itemId)
     }
 
-    override fun getItemCount(): Int {
-        return matches.size
-    }
-
-    fun setImageDrawable(imageView : ImageView, bitmap : Bitmap)
+    fun setIcon(requestURL : String, radius : Int, imageView : ImageView)
     {
-        val drawable =  RoundedBitmapDrawableFactory.create(resources,bitmap)
-        drawable.cornerRadius = 25.0f
-
-        imageView.setImageDrawable(drawable)
-    }
-
-    suspend fun getRuneIcon(runeIcon : String) : Bitmap
-    {
-        val bitmap : Bitmap
-        withContext(Dispatchers.IO) {
-            val requestURL = "https://ddragon.canisback.com/img/$runeIcon"
-            val url = URL(requestURL)
-            val httpURLConnection = url.openConnection() as HttpURLConnection
-            val inputStream = httpURLConnection.inputStream
-            bitmap = BitmapFactory.decodeStream(inputStream)
-        }
-
-        return bitmap
+        Glide.with(context).load(requestURL)
+            .apply(RequestOptions.bitmapTransform(RoundedCorners(radius))).into(imageView)
     }
 
     suspend fun requestRunesReforgedDTO() : JSONArray
@@ -379,35 +411,6 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         return RuneDTO(id, key, icon, name, shortDesc, longDesc)
     }
 
-    suspend fun getItemIcon(matchInfoDTO : SummaryMatchInfoDTO, index : Int) : Bitmap
-    {
-        val bitmap : Bitmap
-        withContext(Dispatchers.IO) {
-            val requestURL = "http://ddragon.leagueoflegends.com/cdn/13.6.1/img/item/${matchInfoDTO.participants.items[index]}.png"
-            val url = URL(requestURL)
-            val httpURLConnection = url.openConnection() as HttpURLConnection
-            val inputStream = httpURLConnection.inputStream
-            bitmap = BitmapFactory.decodeStream(inputStream)
-        }
-
-        return bitmap
-    }
-
-    suspend fun getItemIcon(imageId : String) : Bitmap
-    {
-        val bitmap : Bitmap
-
-        withContext(Dispatchers.IO) {
-            val requestURL = "http://ddragon.leagueoflegends.com/cdn/13.6.1/img/item/${imageId}"
-            val url = URL(requestURL)
-            val httpURLConnection = url.openConnection() as HttpURLConnection
-            val inputStream = httpURLConnection.inputStream
-            bitmap = BitmapFactory.decodeStream(inputStream)
-        }
-
-        return bitmap
-    }
-
     fun getItem() : ItemsDTO
     {
         // 9초
@@ -460,20 +463,6 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         return items
     }
 
-    suspend fun getSpellIcon(spell: SpellDTO) : Bitmap
-    {
-        val bitmap : Bitmap
-        withContext(Dispatchers.IO) {
-            val requestURL = "http://ddragon.leagueoflegends.com/cdn/13.6.1/img/spell/${spell.id}.png"
-            val url = URL(requestURL)
-            val httpURLConnection = url.openConnection() as HttpURLConnection
-            val inputStream = httpURLConnection.inputStream
-            bitmap = BitmapFactory.decodeStream(inputStream)
-        }
-
-        return bitmap
-    }
-
     fun getSpells(): SpellsDTO
     {
         val spellsJson = runBlocking { requestSpellsDTO() }
@@ -511,21 +500,6 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         }
 
         return spellsData
-    }
-
-
-    suspend fun requestChampionIcon(matchInfoDTO : SummaryMatchInfoDTO) : Bitmap
-    {
-        val bitmap : Bitmap
-        withContext(Dispatchers.IO) {
-            val requestURL = "http://ddragon.leagueoflegends.com/cdn/13.6.1/img/champion/${matchInfoDTO.participants.championName}.png"
-            val url = URL(requestURL)
-            val httpURLConnection = url.openConnection() as HttpURLConnection
-            val inputStream = httpURLConnection.inputStream
-            bitmap = BitmapFactory.decodeStream(inputStream)
-        }
-
-        return bitmap
     }
 
     fun getSummaryMatchInfo(index : Int) : SummaryMatchInfoDTO

@@ -18,7 +18,7 @@ import java.util.*
 
 class Network {
 
-    private val apiKey = "RGAPI-75b617e3-9c00-4f2f-bb61-8716d39b48e6"
+    private val apiKey = "RGAPI-f4eca54f-8bc3-4f1c-862c-3c027973bdb6"
     var summonerDTO : SummonerDTO
 
 
@@ -240,11 +240,11 @@ class Network {
         return championsData
     }
 
-    suspend fun requestMatchId() : MutableList<String>
+    suspend fun requestMatchId(start : Int, count : Int) : MutableList<String>
     {
         val matches = mutableListOf<String>()
         withContext(Dispatchers.IO) {
-            val requestURL  = "https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/${summonerDTO.puuid}/ids?start=0&count=20&api_key=$apiKey"
+            val requestURL  = "https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/${summonerDTO.puuid}/ids?start=$start&count=$count&api_key=$apiKey"
 
             val url = URL(requestURL)
             val httpURLConnection = url.openConnection() as HttpURLConnection
