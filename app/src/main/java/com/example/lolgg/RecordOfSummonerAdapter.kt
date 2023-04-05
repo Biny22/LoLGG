@@ -6,6 +6,7 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Rect
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
+import com.example.lolgg.fragment_record.RecordOfSummonerAdapter
 import com.example.lolgg.network.Network
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -31,7 +33,7 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
 
-class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val context: Context) : RecyclerView.Adapter<RecordOfSummonerAdapter.RecordViewHolder>() {
+class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val context: Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     inner class RecordViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
 
         val itemImgView: MutableList<ImageView> = getItemView()
@@ -87,12 +89,13 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
     private val VIEW_TYPE_LOADING = 0
 
     private val network : Network = Network(summonerDTO)
-    val apiKey = "RGAPI-f4eca54f-8bc3-4f1c-862c-3c027973bdb6"
+    val apiKey = "RGAPI-89a20d79-dbb1-4f18-b403-409b956046b9"
 
-    private val matches : MutableList<String> by lazy {
+    val matches : MutableList<String> by lazy {
         runBlocking {
             val start = 0
             val count = if(start == 0) 20 else 10
+            Log.d("adapter", "count : $count")
             network.requestMatchId(start, count)
         }
     }
@@ -105,13 +108,21 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
 
     private lateinit var resources : Resources
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecordViewHolder
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder
     {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.record_item, parent, false)
-        return RecordViewHolder(view)
+        if(viewType == VIEW_TYPE_ITEM) {
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.record_item, parent, false)
+            return RecordViewHolder(view)
+        }
+        else
+        {
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.record_loading, parent, false)
+            return RecordLoadingViewHolder(view)
+        }
     }
 
-    override fun onBindViewHolder(holder: RecordViewHolder, position: Int)
+
+    fun onBindRecordViewHolder(holder: RecordViewHolder, position: Int)
     {
         val matchInfoDTO = getSummaryMatchInfo(position)
 
@@ -162,18 +173,23 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
 
     }
 
+    fun onBindLoadingViewHolder(holder: RecordLoadingViewHolder, position: Int)
+    {
+
+    }
+
     override fun getItemCount(): Int {
         return matches.size
     }
 
     override fun getItemViewType(position: Int): Int {
-        return matches.size
+        return if(matches[position] != "null") VIEW_TYPE_ITEM else VIEW_TYPE_LOADING
     }
 
 
     fun setChampionIcon(championName : String, championImgView : ImageView)
     {
-        val requestURL = "http://ddragon.leagueoflegends.com/cdn/13.6.1/img/champion/$championName.png"
+        val requestURL = "http://ddragon.leagueoflegends.com/cdn/13.7.1/img/champion/$championName.png"
         val radius = 50
         setIcon(requestURL, radius, championImgView)
     }
@@ -188,7 +204,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
                 if(spell.key != spellKeyOfSummoner)
                     continue
 
-                val requestURL = "http://ddragon.leagueoflegends.com/cdn/13.6.1/img/spell/${spell.id}.png"
+                val requestURL = "http://ddragon.leagueoflegends.com/cdn/13.7.1/img/spell/${spell.id}.png"
                 val radius = 25
                 setIcon(requestURL, radius, spellImgView[i])
                 break
@@ -309,7 +325,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
                     continue
 
                 val itemIcon = item.itemDTO.image
-                val requestURL = "http://ddragon.leagueoflegends.com/cdn/13.6.1/img/item/${itemIcon}"
+                val requestURL = "http://ddragon.leagueoflegends.com/cdn/13.7.1/img/item/${itemIcon}"
                 val radius = 25
                 setIcon(requestURL, radius, itemImgView[i])
                 break
@@ -619,6 +635,19 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         }
 
         return matchData
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+
+        if(holder is RecordOfSummonerAdapter.RecordOfSummonerViewHolder)
+        {
+            onBindRecordViewHolder(holder as RecordViewHolder, position)
+        }
+        else
+        {
+            println("Gd")
+            onBindLoadingViewHolder(holder as RecordLoadingViewHolder, position)
+        }
     }
 }
 

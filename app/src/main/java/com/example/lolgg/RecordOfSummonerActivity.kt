@@ -4,20 +4,29 @@ import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lolgg.network.Network
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 class RecordOfSummonerActivity : AppCompatActivity() {
 
     private val summonerDTO by lazy {
         intent.getSerializableExtra("getSummoner") as SummonerDTO
     }
+
+    var isLoading = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,7 +39,6 @@ class RecordOfSummonerActivity : AppCompatActivity() {
         val network = Network(summonerDTO)
         var profileIconBitmap : Bitmap
         var mostChampionViewBitmap : Bitmap
-        val championsDTO = network.getChampionsDTO()
 
         val recyclerView = findViewById<RecyclerView>(R.id.recordOfSummoner)
         val recyclerViewAdapter = RecordOfSummonerAdapter(summonerDTO, baseContext)
@@ -38,6 +46,39 @@ class RecordOfSummonerActivity : AppCompatActivity() {
         recyclerView.addItemDecoration(SpaceItemDecoration(0,10))
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+
+                if(!isLoading)
+                {
+                    if(layoutManager.findLastCompletelyVisibleItemPosition() == recyclerViewAdapter.itemCount-1)
+                    {
+                        //isLoading = true
+                        println("맨 밑")
+                        val list : MutableList<String>
+                        val start = recyclerViewAdapter.matches.size
+
+                        recyclerViewAdapter.matches.add(null.toString())
+                        recyclerViewAdapter.notifyItemInserted(recyclerViewAdapter.itemCount - 1)
+
+                        runBlocking {
+                            recyclerViewAdapter.matches.removeAt(start+1)
+                            list = network.requestMatchId(start,start+10)
+                            Handler(Looper.getMainLooper()).postDelayed({
+                                    recyclerViewAdapter.matches.addAll(list)
+                                    recyclerViewAdapter.notifyItemInserted(recyclerViewAdapter.matches.size)
+                            }, 2000)
+                        }
+                        Log.d("recordActivity", "start : $start")
+                        Log.d("size", "size : ${recyclerViewAdapter.matches.size}")
+                        //runBlocking { loadMore(recyclerViewAdapter) }
+                    }
+                }
+            }
+
+            /*
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
 
@@ -46,6 +87,8 @@ class RecordOfSummonerActivity : AppCompatActivity() {
                     print("끝")
                 }
             }
+
+             */
         })
 
         val inGameButton = findViewById<Button>(R.id.inGameButton)
@@ -66,6 +109,30 @@ class RecordOfSummonerActivity : AppCompatActivity() {
 
         mostChampionView.setImageBitmap(mostChampionViewBitmap)
        // println(s)
+    }
+
+    suspend fun loadMore(recyclerViewAdapter: RecordOfSummonerAdapter)
+    {
+        recyclerViewAdapter.matches.add(null.toString())
+        recyclerViewAdapter.notifyItemInserted(recyclerViewAdapter.itemCount - 1)
+
+        Handler(Looper.getMainLooper()).postDelayed({
+
+                recyclerViewAdapter.matches.removeAt(recyclerViewAdapter.itemCount-1)
+                val scrollPosition = recyclerViewAdapter.itemCount
+                recyclerViewAdapter.notifyItemRemoved(scrollPosition)
+                val currentSize = scrollPosition
+                val nextLimit = currentSize + 10
+                println("맨 밑")
+
+                while (currentSize -1 < nextLimit)
+                {
+                    // 아이템 추가
+                }
+
+                //recyclerViewAdapter.notifyDataSetChanged();
+                isLoading = false
+        }, 2000)
     }
 
     // champion data 를 가져오는 메소

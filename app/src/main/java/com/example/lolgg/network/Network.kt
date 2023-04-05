@@ -18,7 +18,8 @@ import java.util.*
 
 class Network {
 
-    private val apiKey = "RGAPI-f4eca54f-8bc3-4f1c-862c-3c027973bdb6"
+    private val apiKey = "RGAPI-89a20d79-dbb1-4f18-b403-409b956046b9"
+    val version = "https://ddragon.leagueoflegends.com/cdn/13.7.1/"
     var summonerDTO : SummonerDTO
 
 
@@ -79,7 +80,7 @@ class Network {
         var bitmap : Bitmap? = null
         println(summonerDTO?.profileIconId)
         withContext(Dispatchers.IO) {
-            val requestURL = "http://ddragon.leagueoflegends.com/cdn/13.6.1/img/profileicon/${summonerDTO.profileIconId}.png"
+            val requestURL = "${version}img/profileicon/${summonerDTO.profileIconId}.png"
             val url = URL(requestURL)
             val httpURLConnection = url.openConnection() as HttpURLConnection
 
@@ -229,7 +230,7 @@ class Network {
         var championsData : JSONObject
 
         withContext(Dispatchers.IO) {
-            val requestURL = "https://ddragon.leagueoflegends.com/cdn/13.6.1/data/ko_KR/champion.json"
+            val requestURL = "${version}data/ko_KR/champion.json"
             val url = URL(requestURL)
             val httpURLConnection = url.openConnection() as HttpURLConnection
             val inputStream = httpURLConnection.inputStream
