@@ -53,7 +53,8 @@ class RecordOfSummonerActivity : AppCompatActivity() {
 
                 if(!isLoading)
                 {
-                    if(layoutManager.findLastCompletelyVisibleItemPosition() == recyclerViewAdapter.itemCount-1)
+                    if(layoutManager.findLastCompletelyVisibleItemPosition() == recyclerViewAdapter.itemCount-1
+                        && recyclerViewAdapter.matches.size < 50)
                     {
                         isLoading = true
                         val list : MutableList<String>
@@ -66,6 +67,12 @@ class RecordOfSummonerActivity : AppCompatActivity() {
                         runBlocking {
                             //recyclerViewAdapter.matches.removeAt(start+1)
                             list = network.requestMatchId(start,10)
+
+                            if(list.size == 0)
+                            {
+                                return@runBlocking
+                            }
+
                             Handler(Looper.getMainLooper()).postDelayed({
                                 for(i in 0..9)
                                 {

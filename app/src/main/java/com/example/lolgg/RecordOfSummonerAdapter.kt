@@ -128,6 +128,8 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         //Log.d("recordActivity", "start : $start")
         val matchInfoDTO = getSummaryMatchInfo(position) ?: return
 
+        //홍성희홍성희
+
         // 게임 진행 시간 set
         val gameStartTimestamp = matchInfoDTO.gameStartTimestamp.toLong()
         val gameEndTimestamp = matchInfoDTO.gameEndTimestamp.toLong()
@@ -318,6 +320,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         for(i in 0 until itemImgView.size)
         {
             val itemId = items[i]
+
             if(itemId == "0")
             {
                 itemImgView[i].setBackgroundResource(R.drawable.round_ex3)
@@ -526,9 +529,11 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
     fun getSummaryMatchInfo(index : Int) : SummaryMatchInfoDTO?
     {
         val matchData = runBlocking { requestSummaryMatchesInfo(matches[index]) } ?: return null
+
+        println("matchData : $matchData")
         var summaryMatchInfoDTO : SummaryMatchInfoDTO?
 
-        try {
+
             val infodata = JSONObject(matchData["info"].toString())
             val metadata = JSONObject(matchData["metadata"].toString())
             val participants = metadata["participants"].toString()
@@ -540,11 +545,17 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
                 if(participant == summonerDTO.puuid)
                     break
                 count++
-            }
+            } //홍성희홍성희
 
             val gameCreation = infodata["gameCreation"].toString()
             val gameStartTimeStamp = infodata["gameStartTimestamp"].toString()
-            val gameEndTimeStamp = infodata["gameEndTimestamp"].toString()
+
+            val gameEndTimeStamp : String = if(infodata.has("gameEndTimestamp")) {
+                infodata["gameEndTimestamp"].toString()
+            } else {
+                val gameDuration = infodata["gameDuration"].toString().toLong()
+                (gameDuration + gameStartTimeStamp.toLong()).toString()
+            }
             val queueId = infodata["queueId"].toString()
             val gameType = infodata["gameType"].toString()
             val participantsData = JSONArray(infodata["participants"].toString())
@@ -556,18 +567,25 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
             val championName = p["championName"].toString()
             val deaths = p["deaths"].toString()
 
-            val challenges = JSONObject(p["challenges"].toString())
-            val killParticipation : String
-            if(challenges.has("killParticipation"))
-                killParticipation = challenges["killParticipation"].toString()
+
+            val challengesDTO : ChallengesDTO
+            if(p.has("challenges"))
+            {
+                val challenges = JSONObject(p["challenges"].toString())
+                val killParticipation : String
+                if(challenges.has("killParticipation"))
+                    killParticipation = challenges["killParticipation"].toString()
+                else
+                    killParticipation = "0"
+
+                challengesDTO = ChallengesDTO(killParticipation)
+            }
             else
-                killParticipation = "0"
-
-            println("killParticipants : $killParticipation")
-
+            {
+                challengesDTO = ChallengesDTO("0")
+            }
 
             //killParticipation
-            val challengesDTO = ChallengesDTO(killParticipation)
 
             // 아이템템
             val items = mutableListOf<String>()
@@ -626,10 +644,6 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
                 challengesDTO, deaths, items, kill,runeOfSummonerDTO, spellId, win)
             summaryMatchInfoDTO = SummaryMatchInfoDTO(gameCreation, gameStartTimeStamp, gameEndTimeStamp,
                 queueId, gameType, summaryParticipantDTO)
-        } catch (e : Exception)
-        {
-            return null
-        }
 
         return summaryMatchInfoDTO
     }
@@ -645,10 +659,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
                 val inputStream = httpURLConnection.inputStream
                 val scan = Scanner(inputStream)
                 matchData = JSONObject(scan.nextLine())
-                println(matchData)
-            } catch (e : FileNotFoundException)
-            {
-                println("match 불러오다가 죽음")
+            } catch (e : FileNotFoundException) {
                 e.printStackTrace()
                 return@withContext null
             }

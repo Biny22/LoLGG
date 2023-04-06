@@ -251,11 +251,14 @@ class Network {
             val inputStream = httpURLConnection.inputStream
             val scan = Scanner(inputStream)
             val s = scan.nextLine()
-            val tokenizer = StringTokenizer(s)
+            val tokenizer = StringTokenizer(s.substring(1,s.length-1))
 
             while (tokenizer.hasMoreTokens())
             {
-                val match = tokenizer.nextToken("[\",]")
+                val match = tokenizer.nextToken("\",")
+                if(match == "")
+                    return@withContext null
+
                 matches.add(match)
             }
         }
