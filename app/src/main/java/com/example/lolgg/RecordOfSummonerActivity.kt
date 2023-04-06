@@ -55,40 +55,30 @@ class RecordOfSummonerActivity : AppCompatActivity() {
                 {
                     if(layoutManager.findLastCompletelyVisibleItemPosition() == recyclerViewAdapter.itemCount-1)
                     {
-                        //isLoading = true
-                        println("맨 밑")
+                        isLoading = true
                         val list : MutableList<String>
                         val start = recyclerViewAdapter.matches.size
+                        Log.d("dddd","start : $start")
 
-                        recyclerViewAdapter.matches.add(null.toString())
-                        recyclerViewAdapter.notifyItemInserted(recyclerViewAdapter.itemCount - 1)
+                        //recyclerViewAdapter.matches.add(null.toString())
+                        //recyclerViewAdapter.notifyItemInserted(recyclerViewAdapter.itemCount - 1)
 
                         runBlocking {
-                            recyclerViewAdapter.matches.removeAt(start+1)
-                            list = network.requestMatchId(start,start+10)
+                            //recyclerViewAdapter.matches.removeAt(start+1)
+                            list = network.requestMatchId(start,10)
                             Handler(Looper.getMainLooper()).postDelayed({
-                                    recyclerViewAdapter.matches.addAll(list)
-                                    recyclerViewAdapter.notifyItemInserted(recyclerViewAdapter.matches.size)
+                                for(i in 0..9)
+                                {
+                                    recyclerViewAdapter.matches.add(list[i])
+                                    recyclerViewAdapter.notifyItemInserted(start+i)
+                                }
+                                isLoading = false
                             }, 2000)
                         }
-                        Log.d("recordActivity", "start : $start")
-                        Log.d("size", "size : ${recyclerViewAdapter.matches.size}")
                         //runBlocking { loadMore(recyclerViewAdapter) }
                     }
                 }
             }
-
-            /*
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-
-                if(recyclerView.canScrollVertically(1))
-                {
-                    print("끝")
-                }
-            }
-
-             */
         })
 
         val inGameButton = findViewById<Button>(R.id.inGameButton)

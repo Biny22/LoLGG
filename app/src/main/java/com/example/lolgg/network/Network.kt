@@ -18,7 +18,7 @@ import java.util.*
 
 class Network {
 
-    private val apiKey = "RGAPI-89a20d79-dbb1-4f18-b403-409b956046b9"
+    private val apiKey = "RGAPI-a55afd6a-8460-4997-86f5-8aaaa69da9f4"
     val version = "https://ddragon.leagueoflegends.com/cdn/13.7.1/"
     var summonerDTO : SummonerDTO
 
@@ -246,7 +246,6 @@ class Network {
         val matches = mutableListOf<String>()
         withContext(Dispatchers.IO) {
             val requestURL  = "https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/${summonerDTO.puuid}/ids?start=$start&count=$count&api_key=$apiKey"
-
             val url = URL(requestURL)
             val httpURLConnection = url.openConnection() as HttpURLConnection
             val inputStream = httpURLConnection.inputStream

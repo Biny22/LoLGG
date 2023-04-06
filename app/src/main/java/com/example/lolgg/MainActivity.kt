@@ -26,11 +26,15 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val edit = findViewById<EditText>(R.id.summonerEdit)
+        var isLoading = false
 
         edit.setOnKeyListener { view, i, keyEvent ->
             println("keyEvent : $i")
-            if (keyEvent.action != KeyEvent.ACTION_UP && i == KeyEvent.KEYCODE_ENTER)
+            if (keyEvent.action != KeyEvent.ACTION_UP
+                && i == KeyEvent.KEYCODE_ENTER && !isLoading)
             {
+                Log.d("gd","소환사 검색 클릭")
+                isLoading = true
                 val network = Network(edit)
                 var summonerDTO : SummonerDTO?
 
@@ -49,7 +53,7 @@ class MainActivity : AppCompatActivity() {
                 {
                     Toast.makeText(applicationContext, "존재하지 않는 소환사입니다.", Toast.LENGTH_LONG).show()
                 }
-
+                isLoading = false
             }
             true
         }
