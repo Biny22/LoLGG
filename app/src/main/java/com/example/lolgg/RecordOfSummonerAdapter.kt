@@ -534,116 +534,116 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         var summaryMatchInfoDTO : SummaryMatchInfoDTO?
 
 
-            val infodata = JSONObject(matchData["info"].toString())
-            val metadata = JSONObject(matchData["metadata"].toString())
-            val participants = metadata["participants"].toString()
-            val tokenizer = StringTokenizer(participants)
-            var count = 0
-            while(tokenizer.hasMoreTokens())
-            {
-                val participant = tokenizer.nextToken("[\",]")
-                if(participant == summonerDTO.puuid)
-                    break
-                count++
-            } //홍성희홍성희
+        val infodata = JSONObject(matchData["info"].toString())
+        val metadata = JSONObject(matchData["metadata"].toString())
+        val participants = metadata["participants"].toString()
+        val tokenizer = StringTokenizer(participants)
+        var count = 0
+        while(tokenizer.hasMoreTokens())
+        {
+            val participant = tokenizer.nextToken("[\",]")
+            if(participant == summonerDTO.puuid)
+                break
+            count++
+        } //홍성희홍성희
 
-            val gameCreation = infodata["gameCreation"].toString()
-            val gameStartTimeStamp = infodata["gameStartTimestamp"].toString()
+        val gameCreation = infodata["gameCreation"].toString()
+        val gameStartTimeStamp = infodata["gameStartTimestamp"].toString()
 
-            val gameEndTimeStamp : String = if(infodata.has("gameEndTimestamp")) {
-                infodata["gameEndTimestamp"].toString()
-            } else {
-                val gameDuration = infodata["gameDuration"].toString().toLong()
-                (gameDuration + gameStartTimeStamp.toLong()).toString()
-            }
-            val queueId = infodata["queueId"].toString()
-            val gameType = infodata["gameType"].toString()
-            val participantsData = JSONArray(infodata["participants"].toString())
+        val gameEndTimeStamp : String = if(infodata.has("gameEndTimestamp")) {
+            infodata["gameEndTimestamp"].toString()
+        } else {
+            val gameDuration = infodata["gameDuration"].toString().toLong()
+            (gameDuration + gameStartTimeStamp.toLong()).toString()
+        }
+        val queueId = infodata["queueId"].toString()
+        val gameType = infodata["gameType"].toString()
+        val participantsData = JSONArray(infodata["participants"].toString())
 
-            val p = JSONObject(participantsData[count].toString())
+        val p = JSONObject(participantsData[count].toString())
 
-            val assists = p["assists"].toString()
-            val championId = p["championId"].toString()
-            val championName = p["championName"].toString()
-            val deaths = p["deaths"].toString()
+        val assists = p["assists"].toString()
+        val championId = p["championId"].toString()
+        val championName = p["championName"].toString()
+        val deaths = p["deaths"].toString()
 
 
-            val challengesDTO : ChallengesDTO
-            if(p.has("challenges"))
-            {
-                val challenges = JSONObject(p["challenges"].toString())
-                val killParticipation : String
-                if(challenges.has("killParticipation"))
-                    killParticipation = challenges["killParticipation"].toString()
-                else
-                    killParticipation = "0"
-
-                challengesDTO = ChallengesDTO(killParticipation)
-            }
+        val challengesDTO : ChallengesDTO
+        if(p.has("challenges"))
+        {
+            val challenges = JSONObject(p["challenges"].toString())
+            val killParticipation : String
+            if(challenges.has("killParticipation"))
+                killParticipation = challenges["killParticipation"].toString()
             else
+                killParticipation = "0"
+
+            challengesDTO = ChallengesDTO(killParticipation)
+        }
+        else
+        {
+            challengesDTO = ChallengesDTO("0")
+        }
+
+        //killParticipation
+
+        // 아이템템
+        val items = mutableListOf<String>()
+        for(i in 0..6)
+        {
+            val item = p["item$i"].toString()
+            items.add(item)
+        }
+        val win = p["win"] as Boolean
+
+        // 스펠
+        val spellId = mutableListOf<String>()
+        for(i in 1..2)
+        {
+            spellId.add(p["summoner${i}Id"].toString())
+        }
+
+        // 킬
+        val kill = p["kills"].toString()
+
+        val perks = JSONObject(p["perks"].toString())
+
+        // 능력치 룬
+        val ss = JSONObject(perks["statPerks"].toString())
+        val defense = ss["defense"].toString()
+        val flex = ss["flex"].toString()
+        val offense = ss["offense"].toString()
+        val statPerks = StatPerksDTO(defense, flex, offense)
+
+        val stylesJson = JSONArray(perks["styles"].toString())
+        val styles = mutableListOf<StyleDTO>()
+
+        for(i in 0 until stylesJson.length())
+        {
+            val s = JSONObject(stylesJson[i].toString())
+            val description = s["description"].toString()
+            val sel = JSONArray(s["selections"].toString())
+            val runeId = mutableListOf<String>()
+            val style = s["style"].toString()
+
+            for(j in 0 until sel.length())
             {
-                challengesDTO = ChallengesDTO("0")
+                val path = JSONObject(sel[j].toString())
+                runeId.add(path["perk"].toString())
             }
 
-            //killParticipation
+            val styleDTO = StyleDTO(description, runeId, style)
+            styles.add(styleDTO)
+        }
 
-            // 아이템템
-            val items = mutableListOf<String>()
-            for(i in 0..6)
-            {
-                val item = p["item$i"].toString()
-                items.add(item)
-            }
-            val win = p["win"] as Boolean
+        val runeOfSummonerDTO = RuneOfSummonerDTO(statPerks, styles[0], styles[1])
 
-            // 스펠
-            val spellId = mutableListOf<String>()
-            for(i in 1..2)
-            {
-                spellId.add(p["summoner${i}Id"].toString())
-            }
+        // 역;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 홍성희
 
-            // 킬
-            val kill = p["kills"].toString()
-
-            val perks = JSONObject(p["perks"].toString())
-
-            // 능력치 룬
-            val ss = JSONObject(perks["statPerks"].toString())
-            val defense = ss["defense"].toString()
-            val flex = ss["flex"].toString()
-            val offense = ss["offense"].toString()
-            val statPerks = StatPerksDTO(defense, flex, offense)
-
-            val stylesJson = JSONArray(perks["styles"].toString())
-            val styles = mutableListOf<StyleDTO>()
-
-            for(i in 0 until stylesJson.length())
-            {
-                val s = JSONObject(stylesJson[i].toString())
-                val description = s["description"].toString()
-                val sel = JSONArray(s["selections"].toString())
-                val runeId = mutableListOf<String>()
-                val style = s["style"].toString()
-
-                for(j in 0 until sel.length())
-                {
-                    val path = JSONObject(sel[j].toString())
-                    runeId.add(path["perk"].toString())
-                }
-
-                val styleDTO = StyleDTO(description, runeId, style)
-                styles.add(styleDTO)
-            }
-
-            val runeOfSummonerDTO = RuneOfSummonerDTO(statPerks, styles[0], styles[1])
-
-            // 역;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 홍성희
-
-            val summaryParticipantDTO = SummaryParticipantDTO(assists, championId, championName,
-                challengesDTO, deaths, items, kill,runeOfSummonerDTO, spellId, win)
-            summaryMatchInfoDTO = SummaryMatchInfoDTO(gameCreation, gameStartTimeStamp, gameEndTimeStamp,
-                queueId, gameType, summaryParticipantDTO)
+        val summaryParticipantDTO = SummaryParticipantDTO(assists, championId, championName,
+            challengesDTO, deaths, items, kill,runeOfSummonerDTO, spellId, win)
+        summaryMatchInfoDTO = SummaryMatchInfoDTO(gameCreation, gameStartTimeStamp, gameEndTimeStamp,
+            queueId, gameType, summaryParticipantDTO)
 
         return summaryMatchInfoDTO
     }

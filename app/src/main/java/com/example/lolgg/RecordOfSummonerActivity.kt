@@ -105,7 +105,7 @@ class RecordOfSummonerActivity : AppCompatActivity() {
         //profileIconView.setImageBitmap(profileIconBitmap)
 
         mostChampionView.setImageBitmap(mostChampionViewBitmap)
-       // println(s)
+        // println(s)
     }
 
     suspend fun loadMore(recyclerViewAdapter: RecordOfSummonerAdapter)
@@ -115,20 +115,20 @@ class RecordOfSummonerActivity : AppCompatActivity() {
 
         Handler(Looper.getMainLooper()).postDelayed({
 
-                recyclerViewAdapter.matches.removeAt(recyclerViewAdapter.itemCount-1)
-                val scrollPosition = recyclerViewAdapter.itemCount
-                recyclerViewAdapter.notifyItemRemoved(scrollPosition)
-                val currentSize = scrollPosition
-                val nextLimit = currentSize + 10
-                println("맨 밑")
+            recyclerViewAdapter.matches.removeAt(recyclerViewAdapter.itemCount-1)
+            val scrollPosition = recyclerViewAdapter.itemCount
+            recyclerViewAdapter.notifyItemRemoved(scrollPosition)
+            val currentSize = scrollPosition
+            val nextLimit = currentSize + 10
+            println("맨 밑")
 
-                while (currentSize -1 < nextLimit)
-                {
-                    // 아이템 추가
-                }
+            while (currentSize -1 < nextLimit)
+            {
+                // 아이템 추가
+            }
 
-                //recyclerViewAdapter.notifyDataSetChanged();
-                isLoading = false
+            //recyclerViewAdapter.notifyDataSetChanged();
+            isLoading = false
         }, 2000)
     }
 
