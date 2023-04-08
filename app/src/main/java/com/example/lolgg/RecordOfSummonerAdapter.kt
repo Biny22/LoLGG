@@ -3,8 +3,6 @@ package com.example.lolgg
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Resources
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Rect
 import android.util.Log
 import android.view.LayoutInflater
@@ -15,12 +13,10 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
-import com.example.lolgg.fragment_record.RecordOfSummonerAdapter
 import com.example.lolgg.network.Network
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -29,13 +25,12 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.FileNotFoundException
 import java.io.Serializable
-import java.lang.reflect.InvocationTargetException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
 
-class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val context: Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val context: Context) : RecyclerView.Adapter<RecordOfSummonerAdapter.RecordViewHolder>() {
     inner class RecordViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
 
         val itemImgView: MutableList<ImageView> = getItemView()
@@ -91,7 +86,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
     private val VIEW_TYPE_LOADING = 0
 
     private val network : Network = Network(summonerDTO)
-    val apiKey = "RGAPI-a55afd6a-8460-4997-86f5-8aaaa69da9f4"
+    val apiKey = "RGAPI-17cf3052-66a7-406f-a245-764d7b2a9d7b"
 
     val matches : MutableList<String> by lazy {
         runBlocking {
@@ -107,19 +102,27 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
 
     val runeDTO : RunesForgedDTO by lazy { getRunesReforgedDTO() }
 
+    val championsDTO : ChampionsDTO by lazy { network.getChampionsDTO() }
+
     private lateinit var resources : Resources
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecordViewHolder
     {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.record_item, parent, false)
+        return RecordViewHolder(view)
+        /*
         if(viewType == VIEW_TYPE_ITEM) {
             val view = LayoutInflater.from(parent.context).inflate(R.layout.record_item, parent, false)
             return RecordViewHolder(view)
         }
+
         else
         {
             val view = LayoutInflater.from(parent.context).inflate(R.layout.record_loading, parent, false)
             return RecordLoadingViewHolder(view)
         }
+
+         */
     }
 
     fun onBindRecordViewHolder(holder: RecordViewHolder, position: Int)
@@ -135,14 +138,14 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         val gameEndTimestamp = matchInfoDTO.gameEndTimestamp.toLong()
         setPeriodTextView(gameStartTimestamp, gameEndTimestamp, holder.periodTextView)
 
-        // 챔피온 아이콘 set
-        val championName = matchInfoDTO.participants.championName
-        setChampionIcon(championName, holder.championImgView)
+        // set championIcon
+        val championId = matchInfoDTO.participants.championId
+        setChampionIcon(championId, holder.championImgView)
 
         // set itemIcon
         setItemIcon(holder.itemImgView, matchInfoDTO.participants.items)
 
-        // spell 아이콘 set
+        // set spellIcon
         val spellId = matchInfoDTO.participants.spellId
         setSpellIcon(spellId, holder.spellImgView)
 
@@ -187,18 +190,24 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
     }
 
     override fun getItemViewType(position: Int): Int {
-        if(matches[position] == null)
+        if(matches[position] == "null")
             Log.d("getItemViewType", "${matches[position]}")
         return if(matches[position] != "null") VIEW_TYPE_ITEM else VIEW_TYPE_LOADING
     }
+// 홍성희홍성희
 
-
-    fun setChampionIcon(championName : String, championImgView : ImageView)
+    fun setChampionIcon(championId : String, championImgView : ImageView)
     {
+        for(championDTO in championsDTO.data)
+        {
+            if(championDTO.key != championId)
+                continue
 
-        val requestURL = "http://ddragon.leagueoflegends.com/cdn/13.7.1/img/champion/$championName.png"
-        val radius = 50
-        setIcon(requestURL, radius, championImgView)
+            val requestURL = "http://ddragon.leagueoflegends.com/cdn/13.7.1/img/champion/${championDTO.id}.png"
+            val radius = 50
+            setIcon(requestURL, radius, championImgView)
+            return
+        }
     }
 
     fun setSpellIcon(spellId : List<String>, spellImgView : MutableList<ImageView>)
@@ -668,18 +677,22 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         return matchData
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: RecordViewHolder, position: Int) {
 
-        onBindRecordViewHolder(holder as RecordViewHolder, position)
+        onBindRecordViewHolder(holder, position)
+        println(position)
+        /*
         if(holder is RecordOfSummonerAdapter.RecordOfSummonerViewHolder)
         {
             println("pos : $position")
         }
         else
         {
-            println("Gd")
+            println("Gd") // 홍성희홍성희
             //onBindLoadingViewHolder(holder as RecordLoadingViewHolder, position)
         }
+
+         */
     }
 }
 

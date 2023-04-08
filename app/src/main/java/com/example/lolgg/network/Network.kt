@@ -18,7 +18,7 @@ import java.util.*
 
 class Network {
 
-    private val apiKey = "RGAPI-a55afd6a-8460-4997-86f5-8aaaa69da9f4"
+    private val apiKey = "RGAPI-17cf3052-66a7-406f-a245-764d7b2a9d7b"
     val version = "https://ddragon.leagueoflegends.com/cdn/13.7.1/"
     var summonerDTO : SummonerDTO
 
@@ -78,7 +78,7 @@ class Network {
     suspend fun getProFileIcon() : Bitmap?
     {
         var bitmap : Bitmap? = null
-        println(summonerDTO?.profileIconId)
+
         withContext(Dispatchers.IO) {
             val requestURL = "${version}img/profileicon/${summonerDTO.profileIconId}.png"
             val url = URL(requestURL)
@@ -88,7 +88,7 @@ class Network {
                 val inputStream = httpURLConnection.inputStream
                 bitmap = BitmapFactory.decodeStream(inputStream)
             } catch (e : Exception) {
-                println("죽음")
+                println("profileIcon 가져오다가 죽음")
             }
 
         }

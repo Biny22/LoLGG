@@ -70,10 +70,13 @@ class RecordOfSummonerActivity : AppCompatActivity() {
 
                             if(list.size == 0)
                             {
+                                println("더 불러올게 없어용..")
+                                //
                                 return@runBlocking
                             }
 
                             Handler(Looper.getMainLooper()).postDelayed({
+                                println("새로 불러오는 중이야~")
                                 for(i in 0..9)
                                 {
                                     recyclerViewAdapter.matches.add(list[i])
