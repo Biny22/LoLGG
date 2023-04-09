@@ -14,6 +14,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
@@ -30,8 +31,8 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
 
-class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val context: Context) : RecyclerView.Adapter<RecordOfSummonerAdapter.RecordViewHolder>() {
-    inner class RecordViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
+class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val context: Context) : RecyclerView.Adapter<ViewHolder>() {
+    inner class RecordViewHolder(private val view: View) : ViewHolder(view) {
 
         val itemImgView: MutableList<ImageView> = getItemView()
         val spellImgView: MutableList<ImageView> = getSpellView()
@@ -77,28 +78,30 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         }
     }
 
-    inner class RecordLoadingViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
+    inner class RecordLoadingViewHolder(private val view: View) : ViewHolder(view) {
         val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
     }
 
 
     private val VIEW_TYPE_ITEM = 0
-    private val VIEW_TYPE_LOADING = 0
+    private val VIEW_TYPE_LOADING = 1
 
     private val network : Network = Network(summonerDTO)
-    val apiKey = "RGAPI-17cf3052-66a7-406f-a245-764d7b2a9d7b"
+    val apiKey = "RGAPI-634f7c12-1a53-452b-b083-05ba99e19070"
+    var itemPosition = 0
 
     val matches : MutableList<String> by lazy {
         runBlocking {
             val start = 0
-            val count = 20
+            val count = 10
             network.requestMatchId(start, count)
+            // size -> 20
         }
     }
 
-    val spellsDTO : SpellsDTO by lazy { getSpells() }
+    val spellsDTO : SpellsDTO by lazy { runBlocking { getSpells() } }
 
-    val itemDTO : ItemsDTO by lazy { getItem() }
+    val itemDTO : ItemsDTO by lazy { runBlocking { getItem() } }
 
     val runeDTO : RunesForgedDTO by lazy { getRunesReforgedDTO() }
 
@@ -106,11 +109,8 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
 
     private lateinit var resources : Resources
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecordViewHolder
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder
     {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.record_item, parent, false)
-        return RecordViewHolder(view)
-        /*
         if(viewType == VIEW_TYPE_ITEM) {
             val view = LayoutInflater.from(parent.context).inflate(R.layout.record_item, parent, false)
             return RecordViewHolder(view)
@@ -118,18 +118,15 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
 
         else
         {
+            Log.d("onCreateViewHolder", "loading")
             val view = LayoutInflater.from(parent.context).inflate(R.layout.record_loading, parent, false)
             return RecordLoadingViewHolder(view)
         }
-
-         */
     }
 
     fun onBindRecordViewHolder(holder: RecordViewHolder, position: Int)
     {
-
-        //Log.d("recordActivity", "start : $start")
-        val matchInfoDTO = getSummaryMatchInfo(position) ?: return
+        val matchInfoDTO = runBlocking { getSummaryMatchInfo(position) } ?: return
 
         //홍성희홍성희
 
@@ -143,6 +140,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         setChampionIcon(championId, holder.championImgView)
 
         // set itemIcon
+        //setItemIcon(holder.itemImgView, matchInfoDTO.participants.items)
         setItemIcon(holder.itemImgView, matchInfoDTO.participants.items)
 
         // set spellIcon
@@ -177,7 +175,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
 
         holder.container.setBackgroundResource(R.drawable.round_ex1)
         holder.container.clipToOutline = true // 테두리 바깥으로 튀어나가지 않게 함
-
+        itemPosition++
     }
 
     fun onBindLoadingViewHolder(holder: RecordLoadingViewHolder, position: Int)
@@ -189,12 +187,13 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         return matches.size
     }
 
+
     override fun getItemViewType(position: Int): Int {
+
         if(matches[position] == "null")
-            Log.d("getItemViewType", "${matches[position]}")
-        return if(matches[position] != "null") VIEW_TYPE_ITEM else VIEW_TYPE_LOADING
+            Log.d("getItemViewType", "포지션 : ${matches[position]}")
+        return if(matches[position] == "null")  VIEW_TYPE_LOADING else VIEW_TYPE_ITEM
     }
-// 홍성희홍성희
 
     fun setChampionIcon(championId : String, championImgView : ImageView)
     {
@@ -332,6 +331,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
 
             if(itemId == "0")
             {
+                Glide.with(context).clear(itemImgView[i])
                 itemImgView[i].setBackgroundResource(R.drawable.round_ex3)
                 continue
             }
@@ -347,7 +347,6 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
                 setIcon(requestURL, radius, itemImgView[i])
                 break
             }
-            //setImageDrawable(holder.itemImgView[i], itemIcon!!)
         }
     }
 
@@ -444,38 +443,40 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         return RuneDTO(id, key, icon, name, shortDesc, longDesc)
     }
 
-    fun getItem() : ItemsDTO
+    suspend fun getItem() : ItemsDTO
     {
-        // 9초
-        val items = runBlocking { requestItemsDTO() }
-        val itemsJson = JSONObject(items["data"].toString())
+        val type : String
+        val version : String
         val data = mutableListOf<ItemDataDTO>()
-        var currentTime = 0.0
-        for(key in itemsJson.keys())
-        {
-            val itemJson = JSONObject(itemsJson[key].toString())
-            val name = itemJson["name"].toString()
-            val description = itemJson["description"].toString()
-            val plaintext = itemJson["plaintext"].toString()
 
-            val imageJson = JSONObject(itemJson["image"].toString())
-            val imageId = imageJson["full"].toString()
+        withContext(Dispatchers.Default) {
+            val items = runBlocking { requestItemsDTO() }
+            val itemsJson = JSONObject(items["data"].toString())
 
-            val goldJson = JSONObject(itemJson["gold"].toString())
-            val base = goldJson["base"].toString()
-            val total = goldJson["total"].toString()
-            val itemGoldDTO = ItemGoldDTO(base, total)
+            for(key in itemsJson.keys())
+            {
+                val itemJson = JSONObject(itemsJson[key].toString())
+                val name = itemJson["name"].toString()
+                val description = itemJson["description"].toString()
+                val plaintext = itemJson["plaintext"].toString()
 
-            val itemDTO = ItemDTO(name, description, plaintext, imageId, itemGoldDTO)
-            val itemDataDTO = ItemDataDTO(key, itemDTO)
-            data.add(itemDataDTO)
+                val imageJson = JSONObject(itemJson["image"].toString())
+                val imageId = imageJson["full"].toString()
+
+                val goldJson = JSONObject(itemJson["gold"].toString())
+                val base = goldJson["base"].toString()
+                val total = goldJson["total"].toString()
+                val itemGoldDTO = ItemGoldDTO(base, total)
+
+                val itemDTO = ItemDTO(name, description, plaintext, imageId, itemGoldDTO)
+                val itemDataDTO = ItemDataDTO(key, itemDTO)
+                data.add(itemDataDTO)
+            }
+
+            type = items["type"].toString()
+            version = items["version"].toString()
         }
-
-        println("아이템 개수 : ${itemsJson.length()}")
-        println("소요 시간 : ${currentTime}")
-
-        val type = items["type"].toString()
-        val version = items["version"].toString()
+        // 9초
 
         return ItemsDTO(type, version, data)
     }
@@ -496,25 +497,29 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         return items
     }
 
-    fun getSpells(): SpellsDTO
+    suspend fun getSpells(): SpellsDTO
     {
-        val spellsJson = runBlocking { requestSpellsDTO() }
-        val type = spellsJson["type"].toString()
-        val version = spellsJson["version"].toString()
-
-        val spellData = JSONObject(spellsJson["data"].toString())
+        val type : String
+        val version : String
         val data = mutableListOf<SpellDTO>()
+        withContext(Dispatchers.Default) {
+            val spellsJson = runBlocking { requestSpellsDTO() }
+            type = spellsJson["type"].toString()
+            version = spellsJson["version"].toString()
 
-        for (spellName in spellData.keys()) {
-            val spell = JSONObject(spellData[spellName].toString())
+            val spellData = JSONObject(spellsJson["data"].toString())
 
-            val id = spell["id"].toString()
-            val name = spell["name"].toString()
-            val description = spell["description"].toString()
-            val key = spell["key"].toString()
-            val image = spell["image"].toString()
-            val spellDTO = SpellDTO(id, name, description, key, image)
-            data.add(spellDTO)
+            for (spellName in spellData.keys()) {
+                val spell = JSONObject(spellData[spellName].toString())
+
+                val id = spell["id"].toString()
+                val name = spell["name"].toString()
+                val description = spell["description"].toString()
+                val key = spell["key"].toString()
+                val image = spell["image"].toString()
+                val spellDTO = SpellDTO(id, name, description, key, image)
+                data.add(spellDTO)
+            }
         }
 
         return SpellsDTO(type, version, data)
@@ -535,124 +540,126 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         return spellsData
     }
 
-    fun getSummaryMatchInfo(index : Int) : SummaryMatchInfoDTO?
+    suspend fun getSummaryMatchInfo(index : Int) : SummaryMatchInfoDTO?
     {
-        val matchData = runBlocking { requestSummaryMatchesInfo(matches[index]) } ?: return null
+        var summaryMatchInfoDTO : SummaryMatchInfoDTO? = null
 
-        println("matchData : $matchData")
-        var summaryMatchInfoDTO : SummaryMatchInfoDTO?
+        withContext(Dispatchers.Default) {
+            val matchData = runBlocking { requestSummaryMatchesInfo(matches[index]) } ?: return@withContext null
 
-
-        val infodata = JSONObject(matchData["info"].toString())
-        val metadata = JSONObject(matchData["metadata"].toString())
-        val participants = metadata["participants"].toString()
-        val tokenizer = StringTokenizer(participants)
-        var count = 0
-        while(tokenizer.hasMoreTokens())
-        {
-            val participant = tokenizer.nextToken("[\",]")
-            if(participant == summonerDTO.puuid)
-                break
-            count++
-        } //홍성희홍성희
-
-        val gameCreation = infodata["gameCreation"].toString()
-        val gameStartTimeStamp = infodata["gameStartTimestamp"].toString()
-
-        val gameEndTimeStamp : String = if(infodata.has("gameEndTimestamp")) {
-            infodata["gameEndTimestamp"].toString()
-        } else {
-            val gameDuration = infodata["gameDuration"].toString().toLong()
-            (gameDuration + gameStartTimeStamp.toLong()).toString()
-        }
-        val queueId = infodata["queueId"].toString()
-        val gameType = infodata["gameType"].toString()
-        val participantsData = JSONArray(infodata["participants"].toString())
-
-        val p = JSONObject(participantsData[count].toString())
-
-        val assists = p["assists"].toString()
-        val championId = p["championId"].toString()
-        val championName = p["championName"].toString()
-        val deaths = p["deaths"].toString()
-
-
-        val challengesDTO : ChallengesDTO
-        if(p.has("challenges"))
-        {
-            val challenges = JSONObject(p["challenges"].toString())
-            val killParticipation : String
-            if(challenges.has("killParticipation"))
-                killParticipation = challenges["killParticipation"].toString()
-            else
-                killParticipation = "0"
-
-            challengesDTO = ChallengesDTO(killParticipation)
-        }
-        else
-        {
-            challengesDTO = ChallengesDTO("0")
-        }
-
-        //killParticipation
-
-        // 아이템템
-        val items = mutableListOf<String>()
-        for(i in 0..6)
-        {
-            val item = p["item$i"].toString()
-            items.add(item)
-        }
-        val win = p["win"] as Boolean
-
-        // 스펠
-        val spellId = mutableListOf<String>()
-        for(i in 1..2)
-        {
-            spellId.add(p["summoner${i}Id"].toString())
-        }
-
-        // 킬
-        val kill = p["kills"].toString()
-
-        val perks = JSONObject(p["perks"].toString())
-
-        // 능력치 룬
-        val ss = JSONObject(perks["statPerks"].toString())
-        val defense = ss["defense"].toString()
-        val flex = ss["flex"].toString()
-        val offense = ss["offense"].toString()
-        val statPerks = StatPerksDTO(defense, flex, offense)
-
-        val stylesJson = JSONArray(perks["styles"].toString())
-        val styles = mutableListOf<StyleDTO>()
-
-        for(i in 0 until stylesJson.length())
-        {
-            val s = JSONObject(stylesJson[i].toString())
-            val description = s["description"].toString()
-            val sel = JSONArray(s["selections"].toString())
-            val runeId = mutableListOf<String>()
-            val style = s["style"].toString()
-
-            for(j in 0 until sel.length())
+            val infodata = JSONObject(matchData["info"].toString())
+            val metadata = JSONObject(matchData["metadata"].toString())
+            val participants = metadata["participants"].toString()
+            val tokenizer = StringTokenizer(participants)
+            var count = 0
+            while(tokenizer.hasMoreTokens())
             {
-                val path = JSONObject(sel[j].toString())
-                runeId.add(path["perk"].toString())
+                val participant = tokenizer.nextToken("[\",]")
+                if(participant == summonerDTO.puuid)
+                    break
+                count++
+            } //홍성희홍성희
+
+            val gameCreation = infodata["gameCreation"].toString()
+            val gameStartTimeStamp = infodata["gameStartTimestamp"].toString()
+
+            val gameEndTimeStamp : String = if(infodata.has("gameEndTimestamp")) {
+                infodata["gameEndTimestamp"].toString()
+            } else {
+                val gameDuration = infodata["gameDuration"].toString().toLong()
+                (gameDuration + gameStartTimeStamp.toLong()).toString()
+            }
+            val queueId = infodata["queueId"].toString()
+            val gameType = infodata["gameType"].toString()
+            val participantsData = JSONArray(infodata["participants"].toString())
+
+            val p = JSONObject(participantsData[count].toString())
+
+            val assists = p["assists"].toString()
+            val championId = p["championId"].toString()
+            val championName = p["championName"].toString()
+            val deaths = p["deaths"].toString()
+
+
+            val challengesDTO : ChallengesDTO
+            if(p.has("challenges"))
+            {
+                val challenges = JSONObject(p["challenges"].toString())
+                val killParticipation : String
+                if(challenges.has("killParticipation"))
+                    killParticipation = challenges["killParticipation"].toString()
+                else
+                    killParticipation = "0"
+
+                challengesDTO = ChallengesDTO(killParticipation)
+            }
+            else
+            {
+                challengesDTO = ChallengesDTO("0")
             }
 
-            val styleDTO = StyleDTO(description, runeId, style)
-            styles.add(styleDTO)
+            //killParticipation
+
+            // 아이템템
+            val items = mutableListOf<String>()
+            for(i in 0..6)
+            {
+                val item = p["item$i"].toString()
+                items.add(item)
+            }
+            val win = p["win"] as Boolean
+
+            // 스펠
+            val spellId = mutableListOf<String>()
+            for(i in 1..2)
+            {
+                spellId.add(p["summoner${i}Id"].toString())
+            }
+
+            // 킬
+            val kill = p["kills"].toString()
+
+            val perks = JSONObject(p["perks"].toString())
+
+            // 능력치 룬
+            val ss = JSONObject(perks["statPerks"].toString())
+            val defense = ss["defense"].toString()
+            val flex = ss["flex"].toString()
+            val offense = ss["offense"].toString()
+            val statPerks = StatPerksDTO(defense, flex, offense)
+
+            val stylesJson = JSONArray(perks["styles"].toString())
+            val styles = mutableListOf<StyleDTO>()
+
+            for(i in 0 until stylesJson.length())
+            {
+                val s = JSONObject(stylesJson[i].toString())
+                val description = s["description"].toString()
+                val sel = JSONArray(s["selections"].toString())
+                val runeId = mutableListOf<String>()
+                val style = s["style"].toString()
+
+                for(j in 0 until sel.length())
+                {
+                    val path = JSONObject(sel[j].toString())
+                    runeId.add(path["perk"].toString())
+                }
+
+                val styleDTO = StyleDTO(description, runeId, style)
+                styles.add(styleDTO)
+            }
+
+            val runeOfSummonerDTO = RuneOfSummonerDTO(statPerks, styles[0], styles[1])
+
+            // 역;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 홍성희
+
+            val summaryParticipantDTO = SummaryParticipantDTO(assists, championId, championName,
+                challengesDTO, deaths, items, kill,runeOfSummonerDTO, spellId, win)
+            summaryMatchInfoDTO = SummaryMatchInfoDTO(gameCreation, gameStartTimeStamp, gameEndTimeStamp,
+                queueId, gameType, summaryParticipantDTO)
         }
 
-        val runeOfSummonerDTO = RuneOfSummonerDTO(statPerks, styles[0], styles[1])
 
-        // 역;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 홍성희
-
-        val summaryParticipantDTO = SummaryParticipantDTO(assists, championId, championName,
-            challengesDTO, deaths, items, kill,runeOfSummonerDTO, spellId, win)
-        summaryMatchInfoDTO = SummaryMatchInfoDTO(gameCreation, gameStartTimeStamp, gameEndTimeStamp,
-            queueId, gameType, summaryParticipantDTO)
 
         return summaryMatchInfoDTO
     }
@@ -660,6 +667,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
     suspend fun requestSummaryMatchesInfo(matchId : String) : JSONObject?
     {
         var matchData : JSONObject? = null
+
         withContext(Dispatchers.IO) {
             try {
                 val requestURL = "https://asia.api.riotgames.com/lol/match/v5/matches/${matchId}?api_key=$apiKey"
@@ -677,22 +685,22 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         return matchData
     }
 
-    override fun onBindViewHolder(holder: RecordViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int)
+    {
+            //onBindRecordViewHolder(holder, position)
+           // println("position : $position")
 
-        onBindRecordViewHolder(holder, position)
-        println(position)
-        /*
-        if(holder is RecordOfSummonerAdapter.RecordOfSummonerViewHolder)
+        if(holder is RecordOfSummonerAdapter.RecordViewHolder)
         {
+            onBindRecordViewHolder(holder, position)
             println("pos : $position")
         }
         else
         {
-            println("Gd") // 홍성희홍성희
-            //onBindLoadingViewHolder(holder as RecordLoadingViewHolder, position)
+            Log.d("onBindViewHolder", "loading")
+            onBindLoadingViewHolder(holder as RecordLoadingViewHolder, position)
         }
 
-         */
     }
 }
 

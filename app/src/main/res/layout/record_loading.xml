@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/recordLoading"
     android:layout_width="match_parent"
-    android:layout_height="115dp"
+    android:layout_height="70dp"
     android:background="@drawable/round_ex2">
 
 
@@ -17,5 +17,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:indeterminateTint="@color/cc"/>
+        android:indeterminateTint="@color/victoryColor"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

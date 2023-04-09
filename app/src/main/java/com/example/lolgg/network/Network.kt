@@ -18,7 +18,7 @@ import java.util.*
 
 class Network {
 
-    private val apiKey = "RGAPI-17cf3052-66a7-406f-a245-764d7b2a9d7b"
+    private val apiKey = "RGAPI-634f7c12-1a53-452b-b083-05ba99e19070"
     val version = "https://ddragon.leagueoflegends.com/cdn/13.7.1/"
     var summonerDTO : SummonerDTO
 
@@ -256,6 +256,7 @@ class Network {
             while (tokenizer.hasMoreTokens())
             {
                 val match = tokenizer.nextToken("\",")
+
                 if(match == "")
                     return@withContext null
 

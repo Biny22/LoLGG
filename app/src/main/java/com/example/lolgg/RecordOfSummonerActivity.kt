@@ -1,5 +1,6 @@
 package com.example.lolgg
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
@@ -44,12 +45,14 @@ class RecordOfSummonerActivity : AppCompatActivity() {
         val recyclerViewAdapter = RecordOfSummonerAdapter(summonerDTO, baseContext)
         recyclerView.adapter = recyclerViewAdapter
         recyclerView.addItemDecoration(SpaceItemDecoration(0,10))
+        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+
+
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 
+            @SuppressLint("NotifyDataSetChanged")
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-
-                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
 
                 if(!isLoading)
                 {
@@ -59,42 +62,49 @@ class RecordOfSummonerActivity : AppCompatActivity() {
                         isLoading = true
                         val list : MutableList<String>
                         val start = recyclerViewAdapter.matches.size
-                        Log.d("dddd","start : $start")
 
-                        //recyclerViewAdapter.matches.add(null.toString())
-                        //recyclerViewAdapter.notifyItemInserted(recyclerViewAdapter.itemCount - 1)
+                        recyclerViewAdapter.matches.add(null.toString())
+                        /*
+                        Handler(Looper.getMainLooper()).post {
+                            recyclerViewAdapter.notifyItemInserted(start)
+                        }
+
+                         */
 
                         runBlocking {
-                            //recyclerViewAdapter.matches.removeAt(start+1)
                             list = network.requestMatchId(start,10)
 
                             if(list.size == 0)
                             {
                                 println("더 불러올게 없어용..")
-                                //
                                 return@runBlocking
                             }
-
-                            Handler(Looper.getMainLooper()).postDelayed({
-                                println("새로 불러오는 중이야~")
-                                for(i in 0..9)
-                                {
-                                    recyclerViewAdapter.matches.add(list[i])
-                                    recyclerViewAdapter.notifyItemInserted(start+i)
-                                }
-                                isLoading = false
-                            }, 2000)
                         }
-                        //runBlocking { loadMore(recyclerViewAdapter) }
+
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            recyclerViewAdapter.notifyItemInserted(start)
+                        recyclerViewAdapter.matches.removeAt(start)
+                        println("새로 불러오는 중이야~")
+                        for(i in 0 until list.size)
+                        {
+                            recyclerViewAdapter.matches.add(list[i])
+                            //recyclerViewAdapter.notifyItemInserted(start+i)
+                        }
+                        recyclerViewAdapter.notifyDataSetChanged()
+                        isLoading = false
+                        }, 2000)
+                       // runBlocking { loadMore(recyclerViewAdapter) }
                     }
                 }
             }
         })
 
+
+
         val inGameButton = findViewById<Button>(R.id.inGameButton)
-        inGameButton.setBackgroundResource(R.drawable.round_ex1)
+        inGameButton.setBackgroundResource(R.drawable.round_victory)
         val refreshButton = findViewById<Button>(R.id.refreshButton)
-        refreshButton.setBackgroundResource(R.drawable.round_ex2)
+        refreshButton.setBackgroundResource(R.drawable.round_victory)
 
 
         runBlocking {
