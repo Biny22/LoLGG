@@ -93,7 +93,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
     val matches : MutableList<String> by lazy {
         runBlocking {
             val start = 0
-            val count = 10
+            val count = 20
             network.requestMatchId(start, count)
             // size -> 20
         }

@@ -11,13 +11,11 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recordOfSummoner"
         android:layout_width="match_parent"
-        android:layout_height="385dp"
+        android:layout_height="200dp"
         android:background="@color/aa"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
@@ -38,9 +36,9 @@
         android:id="@+id/profileIcon"
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:scaleType="fitXY"
         android:layout_marginStart="16dp"
         android:layout_marginBottom="16dp"
+        android:scaleType="fitXY"
         app:layout_constraintBottom_toBottomOf="@+id/mostChampionImgView"
         app:layout_constraintStart_toStartOf="parent"
         tools:srcCompat="@tools:sample/avatars" />
@@ -51,9 +49,11 @@
         android:layout_height="46dp"
         android:layout_marginStart="40dp"
         android:layout_marginTop="8dp"
-        android:textColor="@color/white"
+        android:layout_marginBottom="8dp"
 
         android:text="전적 갱신"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/tierOfSummoner"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/mostChampionImgView" />
     <!-- android:textStyle="bold" -->
@@ -64,8 +64,11 @@
         android:layout_height="46dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="40dp"
-        android:textColor="@color/white"
+        android:layout_marginBottom="8dp"
+
         android:text="인게임 정보"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/tierOfSummoner"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/mostChampionImgView" />
 
@@ -82,5 +85,19 @@
         app:layout_constraintStart_toEndOf="@+id/profileIcon"
         app:layout_constraintTop_toTopOf="@+id/profileIcon"
         app:layout_constraintVertical_bias="0.266" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/tierOfSummoner"
+        android:layout_width="match_parent"
+        android:layout_height="125dp"
+        android:layout_marginTop="64dp"
+
+        android:background="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/recordOfSummoner"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mostChampionImgView"
+        app:layout_constraintVertical_bias="0.05" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

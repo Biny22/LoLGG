@@ -3,6 +3,7 @@ package com.example.lolgg.network
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.widget.EditText
+import com.beust.klaxon.JsonArray
 import com.example.lolgg.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -31,14 +32,35 @@ class Network {
     constructor(edit : EditText)
     {
         runBlocking {
-            summonerDTO = requestSummoner(edit)!!
+            summonerDTO = getSummonerDTO(edit)!!
         }
     }
 
-    // mainActivity 이후로 다 쓰임
-    private suspend fun requestSummoner(edit : EditText) : SummonerDTO?
+    private suspend fun getSummonerDTO(edit : EditText) : SummonerDTO?
     {
-        var summonerDTO : SummonerDTO? = null
+        val summonerData : JSONObject = requestSummoner(edit) ?: return null
+        val summonerDTO : SummonerDTO
+        withContext(Dispatchers.Default) {
+            val id = summonerData["id"].toString()
+            val accountId = summonerData["accountId"].toString()
+            val puuid = summonerData["puuid"].toString()
+            val name = summonerData["name"].toString()
+            val profileIcon = summonerData["profileIconId"] as Int
+            val revisionData = summonerData["revisionDate"] as Long
+            val summonerLevel = summonerData["summonerLevel"] as Int
+            val ranks = getLeagueEntry(id)
+            //홍성희
+            summonerDTO = SummonerDTO(accountId,profileIcon,revisionData,name,id,puuid,summonerLevel, ranks[0], ranks[1])
+        }
+
+        return summonerDTO
+    }
+
+    // mainActivity 이후로 다 쓰임
+    private suspend fun requestSummoner(edit : EditText) : JSONObject?
+    {
+        var summonerData : JSONObject? = null
+
         withContext(Dispatchers.IO) {
             val summoner = URLEncoder.encode(edit.text.toString(), StandardCharsets.UTF_8.toString())
             val requestURL = "https://kr.api.riotgames.com/lol/summoner/v4/summoners/by-name/$summoner?api_key=$apiKey"
@@ -52,17 +74,7 @@ class Network {
 
                 if(scan.hasNext())
                 {
-                    val summonerData = JSONObject(scan.nextLine())
-
-                    val id = summonerData["id"].toString()
-                    val accountId = summonerData["accountId"].toString()
-                    val puuid = summonerData["puuid"].toString()
-                    val name = summonerData["name"].toString()
-                    val profileIcon = summonerData["profileIconId"] as Int
-                    val revisionData = summonerData["revisionDate"] as Long
-                    val summonerLevel = summonerData["summonerLevel"] as Int
-
-                    summonerDTO = SummonerDTO(accountId,profileIcon,revisionData,name,id,puuid,summonerLevel)
+                    summonerData = JSONObject(scan.nextLine())
                 }
                 return@withContext summonerDTO
             } catch (e : Exception) {
@@ -72,7 +84,60 @@ class Network {
 
         }
 
-        return summonerDTO
+        return summonerData
+    }
+
+    private suspend fun requestLeagueEntry(encryptedSummonerId : String) : String?
+    {
+        var leagueData : String? = null
+        withContext(Dispatchers.IO) {
+            val requestURL = "https://kr.api.riotgames.com/lol/league/v4/entries/by-summoner/$encryptedSummonerId?api_key=$apiKey"
+            val url = URL(requestURL)
+            val httpURLConnection = url.openConnection() as HttpURLConnection
+
+            try{
+                val inputStream = httpURLConnection.inputStream
+                val scan = Scanner(inputStream)
+
+                if(!scan.hasNext())
+                    return@withContext null
+
+                leagueData = scan.nextLine()
+
+            } catch (e : Exception) {
+                println("rank 가져오다가 죽음")
+            }
+        }
+
+        return leagueData
+    }
+
+    private suspend fun getLeagueEntry(encryptedSummonerId: String) : Array<RankDTO?>
+    {
+        val ranks : Array<RankDTO?> = arrayOf(null, null)
+        val leagueString = requestLeagueEntry(encryptedSummonerId) ?: return ranks
+
+        val ranksData = JSONArray(leagueString)
+
+        for(i in 0 until ranksData.length())
+        {
+            val rankData = JSONObject(ranksData[i].toString())
+            val queueType = rankData["queueType"].toString()
+            val tier = rankData["tier"].toString()
+            val rank = rankData["rank"].toString()
+            val leaguePoints = rankData["leaguePoints"].toString()
+            val wins = rankData["wins"].toString()
+            val losses = rankData["losses"].toString()
+
+            val rankDTO = RankDTO(tier, rank, leaguePoints, wins, losses)
+            when(queueType)
+            {
+                "RANKED_FLEX_SR" ->  ranks[1] = rankDTO
+                "RANKED_SOLO_5x5" ->  ranks[0] = rankDTO
+            }
+        }
+
+        return ranks
     }
 
     suspend fun getProFileIcon() : Bitmap?
