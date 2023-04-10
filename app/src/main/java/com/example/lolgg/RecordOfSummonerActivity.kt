@@ -1,25 +1,22 @@
 package com.example.lolgg
 
 import android.annotation.SuppressLint
-import android.app.Application
-import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestOptions
 import com.example.lolgg.network.Network
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 
 class RecordOfSummonerActivity : AppCompatActivity() {
 
@@ -41,14 +38,21 @@ class RecordOfSummonerActivity : AppCompatActivity() {
         var profileIconBitmap : Bitmap
         var mostChampionViewBitmap : Bitmap
 
-        val recyclerView = findViewById<RecyclerView>(R.id.recordOfSummoner)
-        val recyclerViewAdapter = RecordOfSummonerAdapter(summonerDTO, baseContext)
-        recyclerView.adapter = recyclerViewAdapter
-        recyclerView.addItemDecoration(SpaceItemDecoration(0,10))
-        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+        val tierOfSummoner = findViewById<RecyclerView>(R.id.tierOfSummoner)
+        val tierOfSummonerAdapter = TierOfSummonerAdapter(summonerDTO, baseContext)
+        tierOfSummoner.adapter = tierOfSummonerAdapter
+        tierOfSummoner.addItemDecoration(SpaceItemDecoration(0,6))
 
 
-        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+
+
+        val recordOfSummoner = findViewById<RecyclerView>(R.id.recordOfSummoner)
+        val recordOfSummonerAdapter = RecordOfSummonerAdapter(summonerDTO, baseContext)
+        recordOfSummoner.adapter = recordOfSummonerAdapter
+        recordOfSummoner.addItemDecoration(SpaceItemDecoration(0,10))
+        val layoutManager = recordOfSummoner.layoutManager as LinearLayoutManager
+
+        recordOfSummoner.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 
             @SuppressLint("NotifyDataSetChanged")
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -56,14 +60,14 @@ class RecordOfSummonerActivity : AppCompatActivity() {
 
                 if(!isLoading)
                 {
-                    if(layoutManager.findLastCompletelyVisibleItemPosition() == recyclerViewAdapter.itemCount-1
-                        && recyclerViewAdapter.matches.size < 50)
+                    if(layoutManager.findLastCompletelyVisibleItemPosition() == recordOfSummonerAdapter.itemCount-1
+                        && recordOfSummonerAdapter.matches.size < 50)
                     {
                         isLoading = true
                         val list : MutableList<String>
-                        val start = recyclerViewAdapter.matches.size
+                        val start = recordOfSummonerAdapter.matches.size
 
-                        recyclerViewAdapter.matches.add(null.toString())
+                        recordOfSummonerAdapter.matches.add(null.toString())
                         /*
                         Handler(Looper.getMainLooper()).post {
                             recyclerViewAdapter.notifyItemInserted(start)
@@ -82,15 +86,15 @@ class RecordOfSummonerActivity : AppCompatActivity() {
                         }
 
                         Handler(Looper.getMainLooper()).postDelayed({
-                            recyclerViewAdapter.notifyItemInserted(start)
-                        recyclerViewAdapter.matches.removeAt(start)
+                            recordOfSummonerAdapter.notifyItemInserted(start)
+                        recordOfSummonerAdapter.matches.removeAt(start)
                         println("새로 불러오는 중이야~")
                         for(i in 0 until list.size)
                         {
-                            recyclerViewAdapter.matches.add(list[i])
+                            recordOfSummonerAdapter.matches.add(list[i])
                             //recyclerViewAdapter.notifyItemInserted(start+i)
                         }
-                        recyclerViewAdapter.notifyDataSetChanged()
+                        recordOfSummonerAdapter.notifyDataSetChanged()
                         isLoading = false
                         }, 2000)
                        // runBlocking { loadMore(recyclerViewAdapter) }

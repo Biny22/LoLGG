@@ -92,12 +92,14 @@
         android:layout_height="125dp"
         android:layout_marginTop="64dp"
 
-        android:background="@color/white"
+        android:background="@color/aa"
         app:layout_constraintBottom_toTopOf="@+id/recordOfSummoner"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/mostChampionImgView"
-        app:layout_constraintVertical_bias="0.05" />
+        app:layout_constraintVertical_bias="0.05"
+        android:orientation="horizontal"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

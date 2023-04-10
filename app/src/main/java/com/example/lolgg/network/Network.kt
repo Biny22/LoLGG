@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.widget.EditText
 import com.beust.klaxon.JsonArray
+import com.bumptech.glide.Glide
 import com.example.lolgg.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -151,6 +152,7 @@ class Network {
 
             try{
                 val inputStream = httpURLConnection.inputStream
+
                 bitmap = BitmapFactory.decodeStream(inputStream)
             } catch (e : Exception) {
                 println("profileIcon 가져오다가 죽음")
