@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="titleBar" parent="android:Theme">
+        <item name="android:windowTitleSize">48dp</item>
+        <item name="android:windowTitleBackgroundStyle">@layout/titlebar</item>
+    </style>
+
+    <style name="titleBarWindowTitleBackground">
+        <item name="android:background">@color/aa</item>
+    </style>
+</resources>

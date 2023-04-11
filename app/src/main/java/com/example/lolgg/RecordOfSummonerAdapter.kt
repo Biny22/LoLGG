@@ -82,12 +82,11 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
     }
 
-
     private val VIEW_TYPE_ITEM = 0
     private val VIEW_TYPE_LOADING = 1
 
     private val network : Network = Network(summonerDTO)
-    val apiKey = "RGAPI-634f7c12-1a53-452b-b083-05ba99e19070"
+    val apiKey = "RGAPI-3bd09848-5bdd-487f-9f02-ed2c3e25e69a"
     var itemPosition = 0
 
     val matches : MutableList<String> by lazy {
@@ -127,13 +126,13 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
     fun onBindRecordViewHolder(holder: RecordViewHolder, position: Int)
     {
         val matchInfoDTO = runBlocking { getSummaryMatchInfo(position) } ?: return
-
         //홍성희홍성희
 
         // 게임 진행 시간 set
         val gameStartTimestamp = matchInfoDTO.gameStartTimestamp.toLong()
         val gameEndTimestamp = matchInfoDTO.gameEndTimestamp.toLong()
-        setPeriodTextView(gameStartTimestamp, gameEndTimestamp, holder.periodTextView)
+        val timestamp  = gameEndTimestamp - gameStartTimestamp
+        setPeriodTextView(timestamp, holder.periodTextView)
 
         // set championIcon
         val championId = matchInfoDTO.participants.championId
@@ -166,7 +165,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
 
         // set Result
         val result = matchInfoDTO.participants.win
-        setResult(result, holder.linearLayout, holder.resultTextView)
+        setResult(timestamp, result, holder.linearLayout, holder.resultTextView)
 
         // killRate set
         val killParticipation = matchInfoDTO.participants.challenges.killParticipation
@@ -188,10 +187,8 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
     }
 
 
-    override fun getItemViewType(position: Int): Int {
-
-        if(matches[position] == "null")
-            Log.d("getItemViewType", "포지션 : ${matches[position]}")
+    override fun getItemViewType(position: Int): Int
+    {
         return if(matches[position] == "null")  VIEW_TYPE_LOADING else VIEW_TYPE_ITEM
     }
 
@@ -267,9 +264,8 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
     }
 
     @SuppressLint("SimpleDateFormat")
-    fun setPeriodTextView(gameStartTimestamp : Long, gameEndTimestamp : Long, periodTextView: TextView)
+    fun setPeriodTextView(timestamp : Long, periodTextView: TextView)
     {
-        val timestamp  = gameEndTimestamp - gameStartTimestamp
         val periodFormat = SimpleDateFormat("mm : ss")
         periodTextView.text = periodFormat.format(timestamp)
     }
@@ -303,17 +299,22 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         dateTextView.text = dateFormat.format(gameEndTimestamp)
     }
 
-    fun setResult(result : Boolean,linearLayout: LinearLayout, resultTextView : TextView)
+    fun setResult(timestamp: Long, result : Boolean, linearLayout: LinearLayout, resultTextView : TextView)
     {
-        if(result)
+        when
         {
-            linearLayout.setBackgroundResource(R.drawable.round_victory)
-            resultTextView.text = "승리"
-        }
-        else
-        {
-            linearLayout.setBackgroundResource(R.drawable.round_defeat)
-            resultTextView.text = "패배"
+            timestamp <= 225000 -> {
+                linearLayout.setBackgroundResource(R.drawable.round_replay)
+                resultTextView.text = "다시"
+            } // 홍성희
+            result -> {
+                linearLayout.setBackgroundResource(R.drawable.round_victory)
+                resultTextView.text = "승리"
+            }
+            else -> {
+                linearLayout.setBackgroundResource(R.drawable.round_defeat)
+                resultTextView.text = "패배"
+            }
         }
     }
 
@@ -687,13 +688,9 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int)
     {
-            //onBindRecordViewHolder(holder, position)
-           // println("position : $position")
-
         if(holder is RecordOfSummonerAdapter.RecordViewHolder)
         {
             onBindRecordViewHolder(holder, position)
-            println("pos : $position")
         }
         else
         {
