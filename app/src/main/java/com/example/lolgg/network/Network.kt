@@ -6,6 +6,7 @@ import android.widget.EditText
 import com.beust.klaxon.JsonArray
 import com.bumptech.glide.Glide
 import com.example.lolgg.*
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -20,10 +21,9 @@ import java.util.*
 
 class Network {
 
-    private val apiKey = "RGAPI-3bd09848-5bdd-487f-9f02-ed2c3e25e69a"
-    val version = "https://ddragon.leagueoflegends.com/cdn/13.7.1/"
+    private val apiKey = "RGAPI-686549d2-21f3-40a2-82d8-a58f1ca1680f"
+    val version = runBlocking { "http://ddragon.leagueoflegends.com/cdn/${requestVersion()}/" }
     var summonerDTO : SummonerDTO
-
 
     constructor(summonerDTO: SummonerDTO)
     {
@@ -35,6 +35,34 @@ class Network {
         runBlocking {
             summonerDTO = getSummonerDTO(edit)!!
         }
+    }
+
+    private suspend fun requestVersion() : String
+    {
+        var version = ""
+
+        withContext(Dispatchers.IO) {
+            val requestURL = "https://ddragon.leagueoflegends.com/api/versions.json"
+            val url = URL(requestURL)
+            val httpURLConnection = url.openConnection() as HttpURLConnection
+
+            val scan : Scanner
+            try{
+                val inputStream = httpURLConnection.inputStream
+                scan = Scanner(inputStream)
+
+                if(scan.hasNextLine())
+                {
+                    val sampleList = mutableListOf<String>()
+                    version = Gson().fromJson(scan.nextLine(), sampleList::class.java)[0]
+                }
+            } catch (e : Exception) {
+                println("버전 가져오다가 죽음")
+                return@withContext
+            }
+        }
+
+        return version
     }
 
     private suspend fun getSummonerDTO(edit : EditText) : SummonerDTO?

@@ -19,6 +19,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.example.lolgg.network.Network
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -86,7 +87,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
     private val VIEW_TYPE_LOADING = 1
 
     private val network : Network = Network(summonerDTO)
-    val apiKey = "RGAPI-3bd09848-5bdd-487f-9f02-ed2c3e25e69a"
+    val apiKey = "RGAPI-686549d2-21f3-40a2-82d8-a58f1ca1680f"
     var itemPosition = 0
 
     val matches : MutableList<String> by lazy {
@@ -125,50 +126,67 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
 
     fun onBindRecordViewHolder(holder: RecordViewHolder, position: Int)
     {
-        val matchInfoDTO = runBlocking { getSummaryMatchInfo(position) } ?: return
+        val matchDTO = runBlocking { getMatchDTO(position) } ?: return
+        var index : Int = -1
+
+        for(i in 0 until matchDTO.participants.size)
+        {
+            val summonerName = matchDTO.participants[i].summonerName
+
+            if(summonerName != summonerDTO.name)
+                continue
+
+            index = i
+            break
+        }
+
+
         //홍성희홍성희
 
         // 게임 진행 시간 set
-        val gameStartTimestamp = matchInfoDTO.gameStartTimestamp.toLong()
-        val gameEndTimestamp = matchInfoDTO.gameEndTimestamp.toLong()
+        val gameStartTimestamp = matchDTO.gameStartTimestamp.toLong()
+        val gameEndTimestamp = matchDTO.gameEndTimestamp.toLong()
         val timestamp  = gameEndTimestamp - gameStartTimestamp
         setPeriodTextView(timestamp, holder.periodTextView)
 
         // set championIcon
-        val championId = matchInfoDTO.participants.championId
+        val championId = matchDTO.participants[index].championId
         setChampionIcon(championId, holder.championImgView)
 
         // set itemIcon
         //setItemIcon(holder.itemImgView, matchInfoDTO.participants.items)
-        setItemIcon(holder.itemImgView, matchInfoDTO.participants.items)
+        setItemIcon(holder.itemImgView, matchDTO.participants[index].purchasedItems)
 
         // set spellIcon
-        val spellId = matchInfoDTO.participants.spellId
+        val spellId = matchDTO.participants[index].summonerSpell
         setSpellIcon(spellId, holder.spellImgView)
 
         // set primaryStyle
-        val primaryStyle = matchInfoDTO.participants.runeOfSummonerDTO.primaryStyle
+        val primaryStyle = matchDTO.participants[index].perks.primaryStyle
         setPrimaryStyleIcon(primaryStyle, holder.runeImgView[0])
 
         // set subStyle
-        val subStyle = matchInfoDTO.participants.runeOfSummonerDTO.subStyle
+        val subStyle = matchDTO.participants[index].perks.subStyle
         setSubStyleIcon(subStyle, holder.runeImgView[1])
 
         // set gameMode
-        setGameMode(matchInfoDTO.queueId, holder.gameModeTextView)
+        setGameMode(matchDTO.queueId, holder.gameModeTextView)
 
         // set kda
-        setKda(matchInfoDTO.participants, holder.kdaTextView)
+        val kills = matchDTO.participants[index].kills
+        val deaths = matchDTO.participants[index].deaths
+        val assists = matchDTO.participants[index].assists
+        setKda(kills, deaths, assists, holder.kdaTextView)
 
         // set date
         setDate(gameEndTimestamp, holder.dateTextView)
 
         // set Result
-        val result = matchInfoDTO.participants.win
+        val result = matchDTO.participants[index].win
         setResult(timestamp, result, holder.linearLayout, holder.resultTextView)
 
         // killRate set
-        val killParticipation = matchInfoDTO.participants.challenges.killParticipation
+        val killParticipation = matchDTO.participants[index].challenges.killParticipation
         setKillRate(killParticipation, holder.killRateTextView)
 
 
@@ -283,12 +301,9 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         }
     }
 
-    fun setKda(participants : SummaryParticipantDTO, kdaTextView : TextView)
+    fun setKda(kills : String, deaths : String, assists : String, kdaTextView : TextView)
     {
-        val kill = participants.kill
-        val death = participants.deaths
-        val assist = participants.assists
-        val kda = "$kill / $death / $assist"
+        val kda = "$kills / $deaths / $assists"
         kdaTextView.text = kda
     }
 
@@ -389,7 +404,6 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         {
             // { 지배 }
             val json = JSONObject(runesReforgedJson[i].toString())
-
             val id = json["id"].toString()
             val key = json["key"].toString()
             val icon = json["icon"].toString()
@@ -541,131 +555,134 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         return spellsData
     }
 
-    suspend fun getSummaryMatchInfo(index : Int) : SummaryMatchInfoDTO?
+    suspend fun getMatchDTO(index : Int) : MatchDTO?
     {
-        var summaryMatchInfoDTO : SummaryMatchInfoDTO? = null
-
+        println("matchId : ${matches[index]}")
+        var matchDTO : MatchDTO? = null
         withContext(Dispatchers.Default) {
-            val matchData = runBlocking { requestSummaryMatchesInfo(matches[index]) } ?: return@withContext null
+            val matchJson =  requestMatch(matches[index]) ?: return@withContext null
 
-            val infodata = JSONObject(matchData["info"].toString())
-            val metadata = JSONObject(matchData["metadata"].toString())
-            val participants = metadata["participants"].toString()
-            val tokenizer = StringTokenizer(participants)
-            var count = 0
-            while(tokenizer.hasMoreTokens())
-            {
-                val participant = tokenizer.nextToken("[\",]")
-                if(participant == summonerDTO.puuid)
-                    break
-                count++
-            } //홍성희홍성희
+            val info = JSONObject(matchJson["info"].toString())
 
-            val gameCreation = infodata["gameCreation"].toString()
-            val gameStartTimeStamp = infodata["gameStartTimestamp"].toString()
+            val gameCreation = info["gameCreation"].toString()
+            val gameStartTimestamp = info["gameStartTimestamp"].toString()
+            val gameEndTimestamp = info["gameEndTimestamp"].toString()
+            val gameId = info["gameId"].toString()
+            val queueId = info["queueId"].toString()
+            val teamArray = JSONArray(info["teams"].toString())
+            val teams = getTeams(teamArray)
+            val gameType = info["gameType"].toString()
+            val participantsArray = JSONArray(info["participants"].toString())
+            val participants = getParticipants(participantsArray)
 
-            val gameEndTimeStamp : String = if(infodata.has("gameEndTimestamp")) {
-                infodata["gameEndTimestamp"].toString()
-            } else {
-                val gameDuration = infodata["gameDuration"].toString().toLong()
-                (gameDuration + gameStartTimeStamp.toLong()).toString()
-            }
-            val queueId = infodata["queueId"].toString()
-            val gameType = infodata["gameType"].toString()
-            val participantsData = JSONArray(infodata["participants"].toString())
-
-            val p = JSONObject(participantsData[count].toString())
-
-            val assists = p["assists"].toString()
-            val championId = p["championId"].toString()
-            val championName = p["championName"].toString()
-            val deaths = p["deaths"].toString()
-
-
-            val challengesDTO : ChallengesDTO
-            if(p.has("challenges"))
-            {
-                val challenges = JSONObject(p["challenges"].toString())
-                val killParticipation : String
-                if(challenges.has("killParticipation"))
-                    killParticipation = challenges["killParticipation"].toString()
-                else
-                    killParticipation = "0"
-
-                challengesDTO = ChallengesDTO(killParticipation)
-            }
-            else
-            {
-                challengesDTO = ChallengesDTO("0")
-            }
-
-            //killParticipation
-
-            // 아이템템
-            val items = mutableListOf<String>()
-            for(i in 0..6)
-            {
-                val item = p["item$i"].toString()
-                items.add(item)
-            }
-            val win = p["win"] as Boolean
-
-            // 스펠
-            val spellId = mutableListOf<String>()
-            for(i in 1..2)
-            {
-                spellId.add(p["summoner${i}Id"].toString())
-            }
-
-            // 킬
-            val kill = p["kills"].toString()
-
-            val perks = JSONObject(p["perks"].toString())
-
-            // 능력치 룬
-            val ss = JSONObject(perks["statPerks"].toString())
-            val defense = ss["defense"].toString()
-            val flex = ss["flex"].toString()
-            val offense = ss["offense"].toString()
-            val statPerks = StatPerksDTO(defense, flex, offense)
-
-            val stylesJson = JSONArray(perks["styles"].toString())
-            val styles = mutableListOf<StyleDTO>()
-
-            for(i in 0 until stylesJson.length())
-            {
-                val s = JSONObject(stylesJson[i].toString())
-                val description = s["description"].toString()
-                val sel = JSONArray(s["selections"].toString())
-                val runeId = mutableListOf<String>()
-                val style = s["style"].toString()
-
-                for(j in 0 until sel.length())
-                {
-                    val path = JSONObject(sel[j].toString())
-                    runeId.add(path["perk"].toString())
-                }
-
-                val styleDTO = StyleDTO(description, runeId, style)
-                styles.add(styleDTO)
-            }
-
-            val runeOfSummonerDTO = RuneOfSummonerDTO(statPerks, styles[0], styles[1])
-
-            // 역;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 홍성희
-
-            val summaryParticipantDTO = SummaryParticipantDTO(assists, championId, championName,
-                challengesDTO, deaths, items, kill,runeOfSummonerDTO, spellId, win)
-            summaryMatchInfoDTO = SummaryMatchInfoDTO(gameCreation, gameStartTimeStamp, gameEndTimeStamp,
-                queueId, gameType, summaryParticipantDTO)
+            matchDTO = MatchDTO(gameCreation, gameEndTimestamp, gameStartTimestamp, gameId, queueId, teams, gameType, participants)
         }
 
-
-
-        return summaryMatchInfoDTO
+        return matchDTO
     }
 
-    suspend fun requestSummaryMatchesInfo(matchId : String) : JSONObject?
+    fun getParticipants(participantsArray : JSONArray) : MutableList<ParticipantDTO>
+    {
+        val participants = mutableListOf<ParticipantDTO>()
+
+        for(index in 0 until participantsArray.length())
+        {
+            val participantJson = JSONObject(participantsArray[index].toString())
+            val assists = participantJson["assists"].toString()
+            val baronKills = participantJson["baronKills"].toString()
+            val championLevel = participantJson["champLevel"].toString()
+            val championId = participantJson["championId"].toString()
+            val deaths = participantJson["deaths"].toString()
+            val detectorWardsPlaced = participantJson["detectorWardsPlaced"].toString()
+            val goldEarned = participantJson["goldEarned"].toString()
+
+            val purchasedItems = mutableListOf<String>()
+            for(itemIdx in 0..6)
+                purchasedItems.add(participantJson["item$itemIdx"].toString())
+
+            val kills = participantJson["kills"].toString()
+            val killingSpree = participantJson["largestKillingSpree"].toString()
+            val multiKill = participantJson["largestMultiKill"].toString()
+            val neutralMinionsKilled = participantJson["neutralMinionsKilled"].toString()
+
+            val perksJson = JSONObject(participantJson["perks"].toString())
+            val statPerks = Gson().fromJson(perksJson["statPerks"].toString(), StatPerksDTO::class.java)
+            val perksArray = JSONArray(perksJson["styles"].toString())
+            val styleList = getStyleList(perksArray)
+            val perks = PerksDTO(statPerks, styleList[0], styleList[1])
+
+            val summonerSpell = mutableListOf<String>()
+            for(spellIdx in 1..2)
+                summonerSpell.add(participantJson["summoner${spellIdx}Id"].toString())
+
+            val summonerName = participantJson["summonerName"].toString()
+            val teamPosition = participantJson["teamPosition"].toString()
+            val totalDamageDealtToChampion = participantJson["totalDamageDealtToChampions"].toString()
+            val totalMinionsKill = participantJson["totalMinionsKilled"].toString()
+            val totalDamageTaken = participantJson["totalDamageTaken"].toString()
+            val win : Boolean = participantJson["win"].toString().toBoolean()
+
+            val challengesJson = JSONObject(participantJson["challenges"].toString())
+            val challenges = getChallenges(challengesJson)
+
+            participants.add(ParticipantDTO(assists, baronKills, championLevel, championId, deaths,
+                detectorWardsPlaced, goldEarned, purchasedItems, kills, killingSpree, multiKill,
+                neutralMinionsKilled, perks, summonerSpell, summonerName, teamPosition, totalDamageDealtToChampion,
+                totalMinionsKill, totalDamageTaken, win, challenges))
+        }
+
+        return participants
+    }
+
+    fun getChallenges(challengesJson : JSONObject) : ChallengesDTO
+    {
+        val killParticipation = challengesJson["killParticipation"].toString()
+
+        return ChallengesDTO(killParticipation)
+    }
+
+    fun getStyleList(perksArray : JSONArray) : MutableList<StyleDTO>
+    {
+        val styleList = mutableListOf<StyleDTO>()
+
+        for(perksIdx in 0 until perksArray.length())
+        {
+            val styleJson = JSONObject(perksArray[perksIdx].toString())
+            val description = styleJson["description"].toString()
+            val selectionsArray = JSONArray(styleJson["selections"].toString())
+            val runeId = mutableListOf<String>()
+            for(selectionsIdx in 0 until selectionsArray.length())
+                runeId.add(JSONObject(selectionsArray[selectionsIdx].toString())["perk"].toString())
+
+            val style = styleJson["style"].toString()
+            styleList.add(StyleDTO(description, runeId, style))
+        }
+
+        return styleList
+    }
+
+    fun getTeams(teamArray : JSONArray) : MutableList<TeamDTO>
+    {
+        val teams = mutableListOf<TeamDTO>()
+
+        for(index in 0 until teamArray.length())
+        {
+            val teamsJson = JSONObject(teamArray[index].toString())
+            val gson = Gson()
+            val banArray = gson.fromJson(teamsJson["bans"].toString(), Array<BanDTO>::class.java)
+            val bans : MutableList<BanDTO?> = mutableListOf()
+
+            for(banIdx in banArray.indices)
+                bans.add(banArray[banIdx])
+
+            val objectives = gson.fromJson(teamsJson["objectives"].toString(), ObjectivesDTO::class.java)
+            teams.add(TeamDTO(bans, objectives))
+        }
+
+        return teams
+    }
+
+    suspend fun requestMatch(matchId : String) : JSONObject?
     {
         var matchData : JSONObject? = null
 
