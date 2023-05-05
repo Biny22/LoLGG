@@ -61,23 +61,17 @@ class RecordOfSummonerActivity : AppCompatActivity() {
                 if(!isLoading)
                 {
                     if(layoutManager.findLastCompletelyVisibleItemPosition() == recordOfSummonerAdapter.itemCount-1
-                        && recordOfSummonerAdapter.matches.size < 50)
+                        && recordOfSummonerAdapter.matches.matchId.size < 50)
                     {
                         isLoading = true
                         val list : MutableList<String>
-                        val start = recordOfSummonerAdapter.matches.size
+                        val start = recordOfSummonerAdapter.matches.matchId.size
+                        val count = 10
 
-                        recordOfSummonerAdapter.matches.add(null.toString())
-                        /*
-                        Handler(Looper.getMainLooper()).post {
-                            recyclerViewAdapter.notifyItemInserted(start)
-                        }
-
-                         */
+                        recordOfSummonerAdapter.matches.matchId.add(null.toString())
 
                         runBlocking {
-                            list = network.requestMatchId(start,10)
-
+                            list = network.requestMatchId(start,count)
                             if(list.size == 0)
                             {
                                 println("더 불러올게 없어용..")
@@ -87,16 +81,16 @@ class RecordOfSummonerActivity : AppCompatActivity() {
 
                         Handler(Looper.getMainLooper()).postDelayed({
                             recordOfSummonerAdapter.notifyItemInserted(start)
-                        recordOfSummonerAdapter.matches.removeAt(start)
-                        println("새로 불러오는 중이야~")
-                        for(i in 0 until list.size)
-                        {
-                            recordOfSummonerAdapter.matches.add(list[i])
-                            //recyclerViewAdapter.notifyItemInserted(start+i)
-                        }
+                            recordOfSummonerAdapter.matches.matchId.removeAt(start)
+                            println("새로 불러오는 중이야~")
+                            for(i in 0 until list.size)
+                            {
+                                recordOfSummonerAdapter.matches.matchId.add(list[i])
+                            }
+                            recordOfSummonerAdapter.matches.notifyIdInserted(count)
+
                         recordOfSummonerAdapter.notifyDataSetChanged()
-                        isLoading = false
-                        }, 2000)
+                        isLoading = false }, 2000)
                        // runBlocking { loadMore(recyclerViewAdapter) }
                     }
                 }
@@ -127,12 +121,12 @@ class RecordOfSummonerActivity : AppCompatActivity() {
 
     suspend fun loadMore(recyclerViewAdapter: RecordOfSummonerAdapter)
     {
-        recyclerViewAdapter.matches.add(null.toString())
+        recyclerViewAdapter.matches.matchId.add(null.toString())
         recyclerViewAdapter.notifyItemInserted(recyclerViewAdapter.itemCount - 1)
 
         Handler(Looper.getMainLooper()).postDelayed({
 
-            recyclerViewAdapter.matches.removeAt(recyclerViewAdapter.itemCount-1)
+            recyclerViewAdapter.matches.matchId.removeAt(recyclerViewAdapter.itemCount-1)
             val scrollPosition = recyclerViewAdapter.itemCount
             recyclerViewAdapter.notifyItemRemoved(scrollPosition)
             val currentSize = scrollPosition

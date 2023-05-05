@@ -12,6 +12,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.FileNotFoundException
 import java.lang.Exception
 import java.net.HttpURLConnection
 import java.net.URL
@@ -21,7 +22,7 @@ import java.util.*
 
 class Network {
 
-    private val apiKey = "RGAPI-686549d2-21f3-40a2-82d8-a58f1ca1680f"
+    private val apiKey = "RGAPI-74773358-e3c0-4bc4-87c5-1c182354bfed"
     val version = runBlocking { "http://ddragon.leagueoflegends.com/cdn/${requestVersion()}/" }
     var summonerDTO : SummonerDTO
 
@@ -360,5 +361,26 @@ class Network {
         }
 
         return matches
+    }
+
+    suspend fun requestMatch(matchId : String) : JSONObject?
+    {
+        var matchData : JSONObject? = null
+
+        withContext(Dispatchers.IO) {
+            try {
+                val requestURL = "https://asia.api.riotgames.com/lol/match/v5/matches/${matchId}?api_key=$apiKey"
+                val url = URL(requestURL)
+                val httpURLConnection = url.openConnection() as HttpURLConnection
+                val inputStream = httpURLConnection.inputStream
+                val scan = Scanner(inputStream)
+                matchData = JSONObject(scan.nextLine())
+            } catch (e : FileNotFoundException) {
+                e.printStackTrace()
+                return@withContext null
+            }
+        }
+
+        return matchData
     }
 }
