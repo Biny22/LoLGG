@@ -16,14 +16,14 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.4"
         tools:srcCompat="@tools:sample/avatars"
-        android:scaleType="centerCrop"/>
+        android:scaleType="centerCrop" />
 
     <TextView
         android:id="@+id/rankType"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="8dp"
         android:text="랭크 타입"
         android:textColor="@color/white"
         app:layout_constraintStart_toEndOf="@+id/tierImageView"
@@ -49,7 +49,7 @@
         android:layout_marginTop="5dp"
         android:text="0LP"
         android:textColor="@color/white"
-        android:textSize="10sp"
+        android:textSize="12sp"
         app:layout_constraintStart_toEndOf="@+id/tierImageView"
         app:layout_constraintTop_toBottomOf="@+id/tierName" />
 

@@ -7,8 +7,9 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import java.lang.reflect.InvocationTargetException
 
-class Matches(val network: Network) {
+class Matches(private val network: Network) {
 
     var start = 0
     val matchId : MutableList<String> = runBlocking {
@@ -46,7 +47,6 @@ class Matches(val network: Network) {
         var matchDTO : MatchDTO? = null
         withContext(Dispatchers.Default) {
             val matchJson =  network.requestMatch(matchId[index]) ?: return@withContext null
-
             val info = JSONObject(matchJson["info"].toString())
 
             val gameCreation = info["gameCreation"].toString()
@@ -126,7 +126,9 @@ class Matches(val network: Network) {
 
     fun getChallenges(challengesJson : JSONObject) : ChallengesDTO
     {
-        val killParticipation = challengesJson["killParticipation"].toString()
+        val killParticipation =
+            if (challengesJson.has("killParticipation")) challengesJson["killParticipation"].toString()
+            else "0"
 
         return ChallengesDTO(killParticipation)
     }

@@ -90,7 +90,7 @@ class RecordOfSummonerActivity : AppCompatActivity() {
                             recordOfSummonerAdapter.matches.notifyIdInserted(count)
 
                         recordOfSummonerAdapter.notifyDataSetChanged()
-                        isLoading = false }, 2000)
+                        isLoading = false }, 3000)
                        // runBlocking { loadMore(recyclerViewAdapter) }
                     }
                 }

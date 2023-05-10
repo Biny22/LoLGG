@@ -25,7 +25,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.FileNotFoundException
 import java.io.Serializable
 import java.net.HttpURLConnection
 import java.net.URL
@@ -87,16 +86,16 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
     private val VIEW_TYPE_LOADING = 1
 
     private val network : Network = Network(summonerDTO)
-    val apiKey = "RGAPI-74773358-e3c0-4bc4-87c5-1c182354bfed"
+    val apiKey = "RGAPI-e03f0e4f-0d09-49e4-adde-7b2c8ccf1c61"
     var itemPosition = 0
 
     val matches = Matches(network)
 
-    val spellsDTO : SpellsDTO by lazy { runBlocking { getSpells() } }
+    val spells = runBlocking { Spells().getSpells() }
+
+    private val runes = Runes().getRunesReforgedDTO()
 
     val itemDTO : ItemsDTO by lazy { runBlocking { getItem() } }
-
-    val runeDTO : RunesForgedDTO by lazy { getRunesReforgedDTO() }
 
     val championsDTO : ChampionsDTO by lazy { network.getChampionsDTO() }
 
@@ -191,10 +190,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
 
     }
 
-    override fun getItemCount(): Int {
-        return matches.matchId.size
-    }
-
+    override fun getItemCount(): Int = matches.matchId.size
 
     override fun getItemViewType(position: Int): Int
     {
@@ -220,7 +216,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         for(i in 0 until spellImgView.size)
         {
             val spellKeyOfSummoner = spellId[i]
-            for(spell in spellsDTO.data)
+            for(spell in spells.data)
             {
                 if(spell.key != spellKeyOfSummoner)
                     continue
@@ -235,7 +231,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
 
     fun setPrimaryStyleIcon(primaryStyle : StyleDTO, runeImgView : ImageView)
     {
-        for(runePath in runeDTO.data)
+        for(runePath in runes.data)
         {
             if(runePath.id != primaryStyle.style)
                 continue
@@ -259,7 +255,7 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
 
     fun setSubStyleIcon(subStyle : StyleDTO, runeImgView: ImageView)
     {
-        for(runePath in runeDTO.data)
+        for(runePath in runes.data)
         {
             if(runePath.id != subStyle.style)
                 continue
@@ -366,92 +362,6 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
 
 
 
-    suspend fun requestRunesReforgedDTO() : JSONArray
-    {
-        val runesReforgedData : JSONArray
-
-        withContext(Dispatchers.IO) {
-            val requestURL = "https://ddragon.leagueoflegends.com/cdn/10.16.1/data/ko_KR/runesReforged.json"
-            val url = URL(requestURL)
-            val httpURLConnection = url.openConnection() as HttpURLConnection
-            val inputStream = httpURLConnection.inputStream
-            val scan = Scanner(inputStream)
-            runesReforgedData = JSONArray(scan.nextLine())
-        }
-
-        return runesReforgedData
-    }
-
-    fun getRunesReforgedDTO() : RunesForgedDTO
-    {
-        // [ 지배, 영감, 결의, 마법... ] -> runesReforgedJson
-        val runesReforgedJson = runBlocking { requestRunesReforgedDTO() }
-
-        return getRuneDataDTO(runesReforgedJson)
-    }
-
-    fun getRuneDataDTO(runesReforgedJson : JSONArray) : RunesForgedDTO
-    {
-        val data = mutableListOf<RuneDataDTO>()
-
-        for(i in 0 until runesReforgedJson.length())
-        {
-            // { 지배 }
-            val json = JSONObject(runesReforgedJson[i].toString())
-            val id = json["id"].toString()
-            val key = json["key"].toString()
-            val icon = json["icon"].toString()
-            val name = json["name"].toString()
-
-            val slotsArray = JSONArray(json["slots"].toString())
-            val slots = getSlots(slotsArray)
-
-            data.add(RuneDataDTO(id, key, icon, name, slots))
-        }
-
-        return RunesForgedDTO(data)
-    }
-
-    fun getSlots(slotsArray : JSONArray) : List<SlotDTO>
-    {
-        val slots = mutableListOf<SlotDTO>()
-
-        for(j in 0 until slotsArray.length())
-        {
-            val runePaths = JSONObject(slotsArray[j].toString())
-            val array = JSONArray(runePaths["runes"].toString())
-
-            slots.add(getSlotDTO(array))
-        }
-        // slots 하나가 지배룬 전체, 영감룬 전체
-
-        return slots
-    }
-
-    fun getSlotDTO(slots : JSONArray) : SlotDTO
-    {
-        val runes = mutableListOf<RuneDTO>()
-        for(k in 0 until slots.length())
-        {
-            val rune = JSONObject(slots[k].toString())
-            runes.add(getRuneDTO(rune))
-        }
-
-        return SlotDTO(runes)
-    }
-
-    fun getRuneDTO(rune : JSONObject) : RuneDTO
-    {
-        val id = rune["id"].toString()
-        val key = rune["key"].toString()
-        val icon = rune["icon"].toString()
-        val name = rune["name"].toString()
-        val shortDesc = rune["shortDesc"].toString()
-        val longDesc = rune["longDesc"].toString()
-
-        return RuneDTO(id, key, icon, name, shortDesc, longDesc)
-    }
-
     suspend fun getItem() : ItemsDTO
     {
         val type : String
@@ -504,49 +414,6 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
         }
 
         return items
-    }
-
-    suspend fun getSpells(): SpellsDTO
-    {
-        val type : String
-        val version : String
-        val data = mutableListOf<SpellDTO>()
-        withContext(Dispatchers.Default) {
-            val spellsJson = runBlocking { requestSpellsDTO() }
-            type = spellsJson["type"].toString()
-            version = spellsJson["version"].toString()
-
-            val spellData = JSONObject(spellsJson["data"].toString())
-
-            for (spellName in spellData.keys()) {
-                val spell = JSONObject(spellData[spellName].toString())
-
-                val id = spell["id"].toString()
-                val name = spell["name"].toString()
-                val description = spell["description"].toString()
-                val key = spell["key"].toString()
-                val image = spell["image"].toString()
-                val spellDTO = SpellDTO(id, name, description, key, image)
-                data.add(spellDTO)
-            }
-        }
-
-        return SpellsDTO(type, version, data)
-    }
-
-    suspend fun requestSpellsDTO() : JSONObject
-    {
-        val spellsData : JSONObject
-        withContext(Dispatchers.IO) {
-            val requestURL = "https://ddragon.leagueoflegends.com/cdn/13.6.1/data/ko_KR/summoner.json"
-            val url = URL(requestURL)
-            val httpURLConnection = url.openConnection() as HttpURLConnection
-            val inputStream = httpURLConnection.inputStream
-            val scan = Scanner(inputStream)
-            spellsData = JSONObject(scan.nextLine())
-        }
-
-        return spellsData
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int)
