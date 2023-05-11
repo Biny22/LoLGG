@@ -30,16 +30,16 @@ class TierOfSummonerAdapter(private val summonerDTO: SummonerDTO, private val co
     fun getResImg() : MutableMap<String, Int>
     {
         val resImg = mutableMapOf<String, Int>()
-        resImg.put("IRON", R.drawable.emblem_iron)
-        resImg.put("BRONZE", R.drawable.emblem_bronze)
-        resImg.put("SILVER", R.drawable.emblem_silver)
-        resImg.put("GOLD", R.drawable.emblem_gold)
-        resImg.put("PLATINUM", R.drawable.emblem_platinum)
-        resImg.put("DIAMOND", R.drawable.emblem_diamond)
-        resImg.put("MASTER", R.drawable.emblem_master)
-        resImg.put("GRANDMASTER", R.drawable.emblem_grandmaster)
-        resImg.put("CHALLENGER", R.drawable.emblem_challenger)
-
+        resImg.put("IRON", R.drawable.emblem_iron2)
+        resImg.put("BRONZE", R.drawable.emblem_bronze3)
+        resImg.put("SILVER", R.drawable.emblem_silver3)
+        resImg.put("GOLD", R.drawable.emblem_gold3)
+        resImg.put("PLATINUM", R.drawable.emblem_platinum3)
+        resImg.put("DIAMOND", R.drawable.emblem_diamond3)
+        resImg.put("MASTER", R.drawable.emblem_master3)
+        resImg.put("GRANDMASTER", R.drawable.emblem_grandmaster3)
+        resImg.put("CHALLENGER", R.drawable.emblem_challenger3)
+//감망구감망구감망구
         return resImg
     }
 
