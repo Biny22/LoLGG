@@ -21,15 +21,17 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
+    val edit : EditText by lazy { findViewById<EditText>(R.id.summonerEdit) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val edit = findViewById<EditText>(R.id.summonerEdit)
+        //val edit = findViewById<EditText>(R.id.summonerEdit)
         var isLoading = false
 
         edit.setOnKeyListener { view, i, keyEvent ->
-            println("keyEvent : $i")
+
             if (keyEvent.action != KeyEvent.ACTION_UP
                 && i == KeyEvent.KEYCODE_ENTER && !isLoading)
             {
@@ -51,14 +53,23 @@ class MainActivity : AppCompatActivity() {
                 }
                 else
                 {
-                    Toast.makeText(applicationContext, "존재하지 않는 소환사입니다.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(applicationContext, "존재하지 않는 소환사입니다.", Toast.LENGTH_SHORT).show()
                 }
                 isLoading = false
             }
+            else if(keyEvent.action != KeyEvent.ACTION_UP)
+                return@setOnKeyListener super.onKeyUp(i , keyEvent)
+
+
             true
         }
 
 
+    }
+
+    override fun onResume() {
+        edit.setText("")
+        super.onResume()
     }
 
     /*

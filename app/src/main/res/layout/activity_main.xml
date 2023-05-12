@@ -20,7 +20,9 @@
             android:id="@+id/summonerEdit"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:hint="소환사 id" />
+            android:hint="소환사 id"
+            android:textSize="12sp"
+            android:textColor="@color/black"/>
 
     </com.google.android.material.textfield.TextInputLayout>
     <ImageView

@@ -22,9 +22,9 @@ import java.util.*
 
 class Network {
 
-    private val apiKey = "RGAPI-0ffd45fe-0d2f-4068-bdc0-4188c7e072ed"
+    private val apiKey = "RGAPI-d83d1712-911f-4c9e-a3bd-54ccf8e4a821"
     val version = runBlocking { "http://ddragon.leagueoflegends.com/cdn/${requestVersion()}/" }
-    var summonerDTO : SummonerDTO
+    var summonerDTO : SummonerDTO?
 
     constructor(summonerDTO: SummonerDTO)
     {
@@ -34,7 +34,7 @@ class Network {
     constructor(edit : EditText)
     {
         runBlocking {
-            summonerDTO = getSummonerDTO(edit)!!
+            summonerDTO = getSummonerDTO(edit)
         }
     }
 
@@ -175,7 +175,7 @@ class Network {
         var bitmap : Bitmap? = null
 
         withContext(Dispatchers.IO) {
-            val requestURL = "${version}img/profileicon/${summonerDTO.profileIconId}.png"
+            val requestURL = "${version}img/profileicon/${summonerDTO?.profileIconId}.png"
             val url = URL(requestURL)
             val httpURLConnection = url.openConnection() as HttpURLConnection
 
@@ -309,7 +309,7 @@ class Network {
     {
         var key : String
         withContext(Dispatchers.IO) {
-            val requestURL = "https://kr.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/${summonerDTO.id}/top?count=1&api_key=$apiKey"
+            val requestURL = "https://kr.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/${summonerDTO?.id}/top?count=1&api_key=$apiKey"
             val url = URL(requestURL)
             val httpURLConnection = url.openConnection() as HttpURLConnection
             val inputStream = httpURLConnection.inputStream
@@ -341,7 +341,7 @@ class Network {
     {
         val matches = mutableListOf<String>()
         withContext(Dispatchers.IO) {
-            val requestURL  = "https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/${summonerDTO.puuid}/ids?start=$start&count=$count&api_key=$apiKey"
+            val requestURL  = "https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/${summonerDTO?.puuid}/ids?start=$start&count=$count&api_key=$apiKey"
             val url = URL(requestURL)
             val httpURLConnection = url.openConnection() as HttpURLConnection
             val inputStream = httpURLConnection.inputStream
