@@ -7,9 +7,10 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.Serializable
 import java.lang.reflect.InvocationTargetException
 
-class Matches(private val network: Network) {
+class Matches(private val network: Network) : Serializable {
 
     var start = 0
     val matchId : MutableList<String> = runBlocking {

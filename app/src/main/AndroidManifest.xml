@@ -31,6 +31,11 @@
             android:name=".RecordOfSummonerActivity"
             android:exported="true">
         </activity>
+
+        <activity
+            android:name=".detailRecord.DetailRecordActivity"
+            android:exported="true">
+        </activity>
     </application>
 
 </manifest>

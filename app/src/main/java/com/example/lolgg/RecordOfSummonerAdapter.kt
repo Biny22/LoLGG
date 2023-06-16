@@ -2,28 +2,26 @@ package com.example.lolgg
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.res.Resources
 import android.graphics.Rect
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
+import com.example.lolgg.detailRecord.DetailRecordActivity
 import com.example.lolgg.network.Network
-import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
 import org.json.JSONObject
 import java.io.Serializable
 import java.net.HttpURLConnection
@@ -47,6 +45,10 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
 
         val linearLayout : LinearLayout = view.findViewById(R.id.linearLayout)
         val container : ConstraintLayout = view.findViewById(R.id.recordItem)
+
+        init {
+            clickListener()
+        }
 
         private fun getItemView(): MutableList<ImageView> {
             val list = mutableListOf<ImageView>()
@@ -75,6 +77,21 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
             list.add(view.findViewById(R.id.perksSubStyleImgView))
 
             return list
+        }
+
+        private fun clickListener()
+        {
+            view.setOnClickListener {
+                val position = adapterPosition
+                val matchDTO = matches.matchDTO[position]
+                //val intent = Intent(context, )
+                val intent = Intent(context, DetailRecordActivity::class.java)
+                intent.putExtra("MatchDTO",matchDTO)
+                intent.putExtra("SummonerDTO",summonerDTO)
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(intent)
+                Log.d("item", "Click Click")
+            }
         }
     }
 
