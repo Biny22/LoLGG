@@ -22,8 +22,8 @@ import java.util.*
 
 class Network {
 
-    private val apiKey = "RGAPI-bd81ee7c-f862-46bf-b491-3b7420dce8ab"
-    private val apiKey = ""
+    private val apiKey = "RGAPI-6227b0ea-0a53-4a6c-ba51-aa3d9805a2d7"
+
     val version = runBlocking { "http://ddragon.leagueoflegends.com/cdn/${requestVersion()}/" }
     var summonerDTO : SummonerDTO?
 

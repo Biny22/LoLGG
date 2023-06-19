@@ -18,6 +18,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.example.lolgg.detailRecord.DetailRecordActivity
+import com.example.lolgg.dto.Runes
 import com.example.lolgg.network.Network
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -88,9 +89,12 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
                 val intent = Intent(context, DetailRecordActivity::class.java)
                 intent.putExtra("MatchDTO",matchDTO)
                 intent.putExtra("SummonerDTO",summonerDTO)
+                intent.putExtra("ChampionsDTO",championsDTO)
+                intent.putExtra("ItemsDTO",itemDTO)
+                intent.putExtra("Runes.RunesForgedDTO",runes)
+                intent.putExtra("Spells.SpellsDTO",spells)
                 intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(intent)
-                Log.d("item", "Click Click")
             }
         }
     }
@@ -451,12 +455,12 @@ class RecordOfSummonerAdapter(private val summonerDTO : SummonerDTO, private val
 
 data class ItemsDTO(val type : String, val version : String, val data : List<ItemDataDTO>) : Serializable
 
-data class ItemDataDTO(val itemId : String, val itemDTO : ItemDTO)
+data class ItemDataDTO(val itemId : String, val itemDTO : ItemDTO) : Serializable
 
 data class ItemDTO(val name : String, val description : String, val plaintext : String,
-                   val image : String, val gold : ItemGoldDTO)
+                   val image : String, val gold : ItemGoldDTO) : Serializable
 
-data class ItemGoldDTO(val base : String, val total : String)
+data class ItemGoldDTO(val base : String, val total : String) : Serializable
 
 class SpaceItemDecoration(private val spanCount: Int, private val space: Int) : RecyclerView.ItemDecoration() {
     override fun getItemOffsets(

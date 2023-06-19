@@ -1,17 +1,21 @@
 package com.example.lolgg.detailRecord
 
+import android.content.Context
 import android.os.Bundle
-import android.util.Log
+import android.util.AttributeSet
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.example.lolgg.MatchDTO
-import com.example.lolgg.R
-import com.example.lolgg.SummonerDTO
+import androidx.viewpager2.widget.ViewPager2
+import com.example.lolgg.*
 import com.example.lolgg.databinding.ActivityMainBinding
 import com.example.lolgg.detailRecord.fragment_synthesis.SynthesisFragment
+import com.example.lolgg.dto.Runes
 import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
+import kotlinx.coroutines.runBlocking
 
 class DetailRecordActivity : AppCompatActivity() {
 
@@ -23,6 +27,22 @@ class DetailRecordActivity : AppCompatActivity() {
         intent.getSerializableExtra("SummonerDTO") as SummonerDTO
     }
 
+    val championsDTO: ChampionsDTO by lazy {
+        intent.getSerializableExtra("ChampionsDTO") as ChampionsDTO
+    }
+
+    val itemsDTO : ItemsDTO by lazy {
+        intent.getSerializableExtra("ItemsDTO") as ItemsDTO
+    }
+
+    val runes : Runes.RunesForgedDTO by lazy {
+        intent.getSerializableExtra("Runes.RunesForgedDTO") as Runes.RunesForgedDTO
+    }
+
+    val spells : Spells.SpellsDTO by lazy {
+        intent.getSerializableExtra("Spells.SpellsDTO") as Spells.SpellsDTO
+    }
+
     val itemFragment = ArrayList<Fragment>()
 
     lateinit var binding: ActivityMainBinding
@@ -32,15 +52,22 @@ class DetailRecordActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail_record)
 
-        val tab : TabLayout = findViewById(R.id.tabLayout)
-        itemFragment.add(SynthesisFragment())
+        val tabLayout : TabLayout = findViewById(R.id.tabLayout)
+        val viewPager = findViewById<ViewPager2>(R.id.detailPager)
+        val adapter = MyPagerAdapter(this)
+        viewPager.adapter = adapter
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            when(position)
+            {
+                0 -> tab.text = "종합"
+                1 -> tab.text = "팀 분석"
+                2 -> tab.text = "빌드"
+            }
+        }.attach()
 
-        initViewPager()
-
-        tab.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+        /*
+        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
 
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 when(tab?.position)
@@ -57,30 +84,25 @@ class DetailRecordActivity : AppCompatActivity() {
             override fun onTabUnselected(tab: TabLayout.Tab?) {
             }
         })
+
+         */
+    }
+
+    override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
+        initViewPager()
+
+        return super.onCreateView(name, context, attrs)
     }
 
     private fun initViewPager()
     {
-        val viewPager2Adapter = ViewPager2Adapter(this)
-        viewPager2Adapter.addFragment(SynthesisFragment())
-        viewPager2Adapter.addFragment(SynthesisFragment())
-        viewPager2Adapter.addFragment(SynthesisFragment())
-
-        binding.
-
-
-        TabLayoutMediator(binding.tlNavigationView, binding.vpViewpagerMain) { tab, position ->
-            Log.e("YMC", "ViewPager position: ${position}")
-            when (position) {
-                0 -> tab.text = "Tab1"
-                1 -> tab.text = "Tab2"
-                2 -> tab.text = "Tab3"
-            }
-        }.attach()
+        //val demoCollectionAdapter = DemoCollectionAdapter(SynthesisFragment(), summonerDTO, matchDTO)
+       // viewPager.adapter = demoCollectionAdapter
     }
 
     private fun replaceFragment(index : Int)
     {
+        /*
         when(index)
         {
             0 -> {
@@ -92,33 +114,38 @@ class DetailRecordActivity : AppCompatActivity() {
         }
         val fragmentManager = supportFragmentManager
         val fragmentTransaction = fragmentManager.beginTransaction()
-        //fragmentTransaction.replace(R.id.,fragment)
-        //fragmentTransaction.commit()
+        fragmentTransaction.replace(R.id.detailPager,itemFragment[0])
+        fragmentTransaction.commit()
 
+         */
+    }
+
+    private inner class MyPagerAdapter(fa: FragmentActivity) : FragmentStateAdapter(fa) {
+
+        override fun getItemCount(): Int {
+            // 페이지 수 반환
+            return 3
+        }
+
+        override fun createFragment(position: Int): Fragment {
+            // 각 탭에 대한 프래그먼트 반환
+            return SynthesisFragment(summonerDTO, matchDTO, championsDTO, itemsDTO, runes, spells)
+        }
     }
 }
 
-class ViewPager2Adapter(fragmentActivity: FragmentActivity) : FragmentStateAdapter(fragmentActivity) {
-    var fragments: ArrayList<Fragment> = ArrayList()
+class DemoCollectionAdapter(
+    val fragment: Fragment, val summonerDTO: SummonerDTO,
+    val matchDTO: MatchDTO, val championsDTO: ChampionsDTO,
+    val itemsDTO: ItemsDTO, val runes: Runes.RunesForgedDTO,
+    val spellsDTO: Spells.SpellsDTO) : FragmentStateAdapter(fragment) {
 
-    override fun getItemCount(): Int {
-        return fragments.size
-    }
+    override fun getItemCount(): Int = 3
 
     override fun createFragment(position: Int): Fragment {
-        return fragments[position]
+        // Return a NEW fragment instance in createFragment(int)
+        val fragment = SynthesisFragment(summonerDTO, matchDTO, championsDTO, itemsDTO, runes, spellsDTO)
+        return fragment
     }
-
-    fun addFragment(fragment: Fragment) {
-        fragments.add(fragment)
-        notifyItemInserted(fragments.size - 1)
-        //TODO: notifyItemInserted!!
-    }
-
-    fun removeFragment() {
-        fragments.removeLast()
-        notifyItemRemoved(fragments.size)
-        //TODO: notifyItemRemoved!!
-    }
-
 }
+
