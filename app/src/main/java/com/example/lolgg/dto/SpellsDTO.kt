@@ -5,14 +5,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import java.io.Serializable
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
 
 class Spells {
-    data class SpellsDTO(val type : String, val version : String, val data : List<SpellDTO>)
+    data class SpellsDTO(val type : String, val version : String, val data : List<SpellDTO>) : Serializable
 
-    data class SpellDTO(val id : String, val name : String, val description : String, val key : String, val image : String)
+    data class SpellDTO(val id : String, val name : String, val description : String, val key : String, val image : String) : Serializable
 
     suspend fun getSpells(): SpellsDTO = parsingSpellsDTO()
 

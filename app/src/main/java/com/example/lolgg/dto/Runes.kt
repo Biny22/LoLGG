@@ -1,4 +1,4 @@
-package com.example.lolgg
+package com.example.lolgg.dto
 
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
@@ -6,6 +6,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.Serializable
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
@@ -13,13 +14,13 @@ import java.util.*
 
 class Runes {
 
-    data class RunesForgedDTO(val data : List<RuneDataDTO>)
+    data class RunesForgedDTO(val data : List<RuneDataDTO>) : Serializable
 
-    data class RuneDataDTO(val id : String, val key : String, val icon : String, val name : String, val slots : List<SlotDTO>)
+    data class RuneDataDTO(val id : String, val key : String, val icon : String, val name : String, val slots : List<SlotDTO>) : Serializable
 
-    data class SlotDTO(val runes : List<RuneDTO>)
+    data class SlotDTO(val runes : List<RuneDTO>) : Serializable
 
-    data class RuneDTO(val id : String, val key : String, val icon : String, val name : String, val sortDesc : String, val longDesc : String)
+    data class RuneDTO(val id : String, val key : String, val icon : String, val name : String, val sortDesc : String, val longDesc : String) : Serializable
 
 
     fun getRunesReforgedDTO() : RunesForgedDTO
