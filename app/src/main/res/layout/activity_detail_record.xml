@@ -31,7 +31,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/gameMode2"
+        android:id="@+id/gameMode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="312dp"
@@ -45,12 +45,12 @@
         android:id="@+id/gameDuration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="332dp"
+        android:layout_marginStart="312dp"
         android:layout_marginTop="4dp"
         android:text="27분 12초"
         android:textColor="@color/white"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/gameMode2" />
+        app:layout_constraintTop_toBottomOf="@+id/gameMode" />
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"

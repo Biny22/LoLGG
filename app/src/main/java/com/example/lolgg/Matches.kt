@@ -169,7 +169,10 @@ class Matches(private val network: Network) : Serializable {
                 bans.add(banArray[banIdx])
 
             val objectives = gson.fromJson(teamsJson["objectives"].toString(), ObjectivesDTO::class.java)
-            teams.add(TeamDTO(bans, objectives))
+            val teamId = gson.fromJson(teamsJson["teamId"].toString(), Int::class.java)
+            val win = gson.fromJson(teamsJson["win"].toString(), Boolean::class.java)
+
+            teams.add(TeamDTO(bans, objectives, teamId, win))
         }
 
         return teams

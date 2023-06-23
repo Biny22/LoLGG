@@ -29,13 +29,13 @@ class SynthesisFragment(val summonerDTO: SummonerDTO, val match: MatchDTO,
     ): View? {
         println("ㅎㅇㅎㅇㅎㅇ")
         val view = inflater.inflate(R.layout.fragment_synthesis, container, false)
-        recyclerview1(inflater, container, view)
-        recyclerview2(inflater, container, view)
+        recyclerview1(view)
+        recyclerview2(view)
         return view
     }
 
 
-    fun recyclerview1(inflater : LayoutInflater, container : ViewGroup?, view : View)
+    fun recyclerview1(view : View)
     {
         val synthesisRecyclerview = view.findViewById<RecyclerView>(R.id.synthesisRecyclerview)
         val synthesisRecordAdapter = SynthesisRecordAdapter(summonerDTO, match, championsDTO, itemsDTO, runes, spells, 0)
@@ -45,7 +45,7 @@ class SynthesisFragment(val summonerDTO: SummonerDTO, val match: MatchDTO,
         //synthesisRecyclerview?.addItemDecoration(SpaceItemDecoration(0,6))
     }
 
-    fun recyclerview2(inflater : LayoutInflater, container : ViewGroup?, view : View)
+    fun recyclerview2(view : View)
     {
         val synthesisRecyclerview = view.findViewById<RecyclerView>(R.id.synthesisRecyclerview2)
         val synthesisRecordAdapter = SynthesisRecordAdapter(summonerDTO, match, championsDTO, itemsDTO, runes, spells, 5)

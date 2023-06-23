@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.util.AttributeSet
 import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -56,6 +57,22 @@ class DetailRecordActivity : AppCompatActivity() {
         val viewPager = findViewById<ViewPager2>(R.id.detailPager)
         val adapter = MyPagerAdapter(this)
         viewPager.adapter = adapter
+
+        // setGameMode
+        val gameMode : TextView = findViewById(R.id.gameMode)
+        val queueDTO = getQueueId()
+        gameMode.text = queueDTO[matchDTO.queueId]
+
+        // setGameDuration
+        val duration : TextView = findViewById(R.id.gameDuration)
+        val startTime = matchDTO.gameStartTimestamp + ""
+        val endTime = matchDTO.gameEndTimestamp + ""
+        duration.text = "${(endTime.toLong() - startTime.toLong()) / 1000}"
+
+        val textView : TextView = findViewById(R.id.textView3)
+        // 사용자가 이겼는지 졌는지 확인
+
+        //textView.setBackgroundColor(R.id.detailPager)
 
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             when(position)

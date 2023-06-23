@@ -14,7 +14,7 @@ data class ParticipantDTO(val assists : String, val baronKills : String, val cha
                           val summonerSpell : MutableList<String>, val summonerName : String, val teamPosition : String, val totalDamageDealtToChampion : String,
                           val totalMinionsKill : String, val totalDamageTaken : String, val win : Boolean, val challenges : ChallengesDTO) : Serializable
 
-data class TeamDTO(val bans : MutableList<BanDTO?>, val objectives : ObjectivesDTO) : Serializable
+data class TeamDTO(val bans : MutableList<BanDTO?>, val objectives : ObjectivesDTO, val teamId : Int, val wine : Boolean) : Serializable
 
 data class BanDTO(val championId : String, val pickTurn : String) : Serializable
 
