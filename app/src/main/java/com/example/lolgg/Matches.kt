@@ -112,6 +112,7 @@ class Matches(private val network: Network) : Serializable {
             val totalMinionsKill = participantJson["totalMinionsKilled"].toString()
             val totalDamageTaken = participantJson["totalDamageTaken"].toString()
             val win : Boolean = participantJson["win"].toString().toBoolean()
+            val teamId : String = participantJson["teamId"].toString()
 
             val challengesJson = JSONObject(participantJson["challenges"].toString())
             val challenges = getChallenges(challengesJson)
@@ -119,7 +120,7 @@ class Matches(private val network: Network) : Serializable {
             participants.add(ParticipantDTO(assists, baronKills, championLevel, championId, deaths,
                 detectorWardsPlaced, goldEarned, purchasedItems, kills, killingSpree, multiKill,
                 neutralMinionsKilled, perks, summonerSpell, summonerName, teamPosition, totalDamageDealtToChampion,
-                totalMinionsKill, totalDamageTaken, win, challenges))
+                totalMinionsKill, totalDamageTaken, win, challenges, teamId))
         }
 
         return participants

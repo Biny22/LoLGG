@@ -14,9 +14,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-
-
-
         <LinearLayout
             android:id="@+id/synthesisLinear"
             android:layout_width="match_parent"
@@ -29,7 +26,7 @@
                 android:layout_height="50dp">
 
                 <TextView
-                    android:id="@+id/textView5"
+                    android:id="@+id/team1ResultColor"
                     android:layout_width="match_parent"
                     android:layout_height="5dp"
                     android:background="@color/victoryColor"
@@ -38,42 +35,94 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/textView2"
+                    android:id="@+id/team1Result"
                     android:layout_width="50dp"
                     android:layout_height="20dp"
                     android:layout_marginStart="15dp"
                     android:layout_marginTop="15dp"
                     android:text="승리"
-                    android:textColor="@color/white"
+                    android:textColor="@color/black"
                     android:textSize="15sp"
                     android:textStyle="bold"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/redTeamKda"
+                    android:id="@+id/team1KDA"
                     android:layout_width="wrap_content"
                     android:layout_height="20dp"
                     android:gravity="center_vertical"
                     android:layout_marginTop="15dp"
                     android:layout_marginStart="10dp"
                     android:text="10/5/13"
-                    android:textColor="@color/white"
+                    android:textColor="@color/black"
                     android:textSize="15sp"
                     android:textStyle="bold"
-                    app:layout_constraintStart_toEndOf="@+id/textView2"
+                    app:layout_constraintStart_toEndOf="@+id/team1Result"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    android:id="@+id/textView2"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
+                    android:layout_marginEnd="5dp"
                     android:gravity="center_vertical"
                     android:text="Ban"
                     android:textSize="10dp"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:layout_editor_absoluteX="233dp" />
+                    app:layout_constraintEnd_toStartOf="@+id/team1Ban1"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:id="@+id/team1Ban1"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginEnd="5dp"
+                    app:layout_constraintEnd_toStartOf="@+id/team1Ban2"
+                    app:layout_constraintTop_toBottomOf="@+id/team1ResultColor"
+                    android:layout_marginTop="10dp"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <ImageView
+                    android:id="@+id/team1Ban2"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    app:layout_constraintEnd_toStartOf="@+id/team1Ban3"
+                    app:layout_constraintTop_toBottomOf="@+id/team1ResultColor"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <ImageView
+                    android:id="@+id/team1Ban3"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    app:layout_constraintEnd_toStartOf="@+id/team1Ban4"
+                    app:layout_constraintTop_toBottomOf="@+id/team1ResultColor"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <ImageView
+                    android:id="@+id/team1Ban4"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    app:layout_constraintEnd_toStartOf="@+id/team1Ban5"
+                    app:layout_constraintTop_toBottomOf="@+id/team1ResultColor"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <ImageView
+                    android:id="@+id/team1Ban5"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginEnd="10dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/team1ResultColor"
+                    android:layout_marginTop="10dp"
+                    tools:srcCompat="@tools:sample/avatars" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -94,6 +143,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="5dp"
+                    android:id="@+id/team2ResultColor"
                     android:background="@color/defeatColor"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -105,11 +155,89 @@
                     android:layout_marginTop="15dp"
                     android:layout_marginStart="15dp"
                     android:text="패배"
-                    android:textColor="@color/white"
+                    android:id="@+id/team2Result"
+                    android:textColor="@color/black"
                     android:textSize="15sp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     android:textStyle="bold"/>
+
+                <TextView
+                    android:id="@+id/team2KDA"
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginStart="10dp"
+                    android:text="10/5/13"
+                    android:textColor="@color/black"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toEndOf="@+id/team2Result"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:gravity="center_vertical"
+                    android:text="Ban"
+                    android:textSize="10dp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toStartOf="@+id/team2Ban1"
+                    android:layout_marginEnd="5dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:layout_editor_absoluteX="233dp" />
+
+                <ImageView
+                    android:id="@+id/team2Ban1"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginEnd="5dp"
+                    app:layout_constraintEnd_toStartOf="@+id/team2Ban2"
+                    app:layout_constraintTop_toBottomOf="@+id/team2ResultColor"
+                    android:layout_marginTop="10dp"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <ImageView
+                    android:id="@+id/team2Ban2"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    app:layout_constraintEnd_toStartOf="@+id/team2Ban3"
+                    app:layout_constraintTop_toBottomOf="@+id/team2ResultColor"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <ImageView
+                    android:id="@+id/team2Ban3"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    app:layout_constraintEnd_toStartOf="@+id/team2Ban4"
+                    app:layout_constraintTop_toBottomOf="@+id/team2ResultColor"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <ImageView
+                    android:id="@+id/team2Ban4"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    app:layout_constraintEnd_toStartOf="@+id/team2Ban5"
+                    app:layout_constraintTop_toBottomOf="@+id/team2ResultColor"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <ImageView
+                    android:id="@+id/team2Ban5"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginEnd="10dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/team2ResultColor"
+                    android:layout_marginTop="10dp"
+                    tools:srcCompat="@tools:sample/avatars" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

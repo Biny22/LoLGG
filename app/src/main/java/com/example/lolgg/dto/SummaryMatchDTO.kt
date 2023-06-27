@@ -7,14 +7,13 @@ import java.io.Serializable
 data class MatchDTO(val gameCreation : String, val gameEndTimestamp : String, val gameStartTimestamp : String, val gameId : String,
                     val queueId : String, val teams : MutableList<TeamDTO>, val gameType : String, val participants : MutableList<ParticipantDTO>) : Serializable
 
-
 data class ParticipantDTO(val assists : String, val baronKills : String, val champLevel : String, val championId : String, val deaths : String,
                           val detectorWardsPlaced : String, val goldEarned : String, val purchasedItems : List<String>, val kills : String,
                           val killingSpree : String, val multiKill: String, val neutralMinionsKilled : String, val perks : PerksDTO,
                           val summonerSpell : MutableList<String>, val summonerName : String, val teamPosition : String, val totalDamageDealtToChampion : String,
-                          val totalMinionsKill : String, val totalDamageTaken : String, val win : Boolean, val challenges : ChallengesDTO) : Serializable
+                          val totalMinionsKill : String, val totalDamageTaken : String, val win : Boolean, val challenges : ChallengesDTO, val teamId : String) : Serializable
 
-data class TeamDTO(val bans : MutableList<BanDTO?>, val objectives : ObjectivesDTO, val teamId : Int, val wine : Boolean) : Serializable
+data class TeamDTO(val bans : MutableList<BanDTO?>, val objectives : ObjectivesDTO, val teamId : Int, val win : Boolean) : Serializable
 
 data class BanDTO(val championId : String, val pickTurn : String) : Serializable
 

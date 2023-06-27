@@ -14,7 +14,7 @@ import com.example.lolgg.*
 import com.example.lolgg.dto.Runes
 
 
-class SynthesisRecordAdapter(private val summonerDTO: SummonerDTO, private val match : MatchDTO,
+class SynthesisRecordAdapter(private val summonerDTO: SummonerDTO, private val participantDTO : MutableList<ParticipantDTO>,
                              private val championsDTO: ChampionsDTO, private val itemDTO: ItemsDTO,
                              private val runes : Runes.RunesForgedDTO, private val spells: Spells.SpellsDTO,
                              private var index : Int) : RecyclerView.Adapter<SynthesisRecordAdapter.SynthesisViewHolder>() {
@@ -75,9 +75,7 @@ class SynthesisRecordAdapter(private val summonerDTO: SummonerDTO, private val m
 
     @SuppressLint("SetTextI18n", "ResourceAsColor")
     override fun onBindViewHolder(holder: SynthesisViewHolder, position: Int) {
-
-
-        val player : ParticipantDTO = match.participants[position+index]
+        val player : ParticipantDTO = participantDTO[position]
 
         /*
         for(summoners in match.participants)
